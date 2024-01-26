@@ -15,9 +15,6 @@
                     <hr>
                     <p style="display: block; width: 95%;;">Select Steganographic Medium:</p>
                     <input type="file" id="encode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <p style="display: block; width: 95%;">Type all space characters you wish to use:</p>
-                    <textarea id="encode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateEncodeDepth()"></textarea>
-                    <i id="encode_bitdepth" style="display: block; width: 95%; resize: none;">Encoder will use bit depth of 0</i>
                     <p style="display: block; width: 95%;">Type the message you wish to encode:</p>
                     <textarea id="encode_message" style="width: 95%; resize: none; white-space: pre;"></textarea>
                     <pre></pre>
@@ -30,8 +27,6 @@
                     <hr>
                     <p style="display: block; width: 95%;">Select Text with Steganographic Data:</p>
                     <input type="file" id="decode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <textarea id="decode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateDecodeDepth()"></textarea>
-                    <i id="decode_bitdepth" style="display: block; width: 95%;">Decoder will use bit depth of 0</i>
                     <pre></pre>
                     <button type="button" onclick="window.main.execution('DECODE_READ')" style="font-size: 24px; display: block;">Decode</button>
                 </form>

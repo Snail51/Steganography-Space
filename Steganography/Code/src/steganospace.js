@@ -7,13 +7,13 @@ export class Steganography
 
         this.encodeMedium = "";
         this.encodeMessage = "";
-        this.encodeSpaces = "";
-        this.encodeBitDepth = 0;
+        this.encodeSpaces = "⓪①②③④⑤⑥⑦⑧⑨Ⓐ\u0020\u00A0\u2000\u2002\u2004\u2005\u2006\u2008\u2009\u202F\u205F";
+        this.encodeBitDepth = 11;
         this.encodeResult = "";
 
         this.decodeRaw = "";
-        this.decodeSpaces = "";
-        this.decodeBitDepth = 0;
+        this.decodeSpaces = "⓪①②③④⑤⑥⑦⑧⑨Ⓐ\u0020\u00A0\u2000\u2002\u2004\u2005\u2006\u2008\u2009\u202F\u205F";
+        this.decodeBitDepth = 11;
         this.decodeResult = "";
     }
 
@@ -50,18 +50,6 @@ export class Steganography
 
     encode()
     {
-        //figure out what spaces we are using and what bit depth we can support
-        this.encodeSpaces = document.getElementById("encode_spaces").value;
-        var holder = new Array();
-        for(var char of this.encodeSpaces)
-        {
-            holder.push(char.charCodeAt(0));
-        }
-        this.encodeSpaces = holder;
-        this.encodeSpaces = this.encodeSpaces.sort((a, b) => parseInt(a) - parseInt(b));
-        this.encodeSpaces = this.encodeSpaces.filter(function(elem, index, self) {return index === self.indexOf(elem);});
-        this.encodeBitDepth = this.encodeSpaces.length;
-
         //build our message
         this.encodeMessage = document.getElementById("encode_message").value;
         this.encodeMessage = encodeURIComponent(this.encodeMessage);
@@ -69,18 +57,20 @@ export class Steganography
         var holder = "";
         for(var char of this.encodeMessage)
         {
-            var baseten = char.charCodeAt(0);
-            baseten = this.padLeft(baseten.toString(), 3, "0");
-            console.log("Pushing " + baseten);
-            holder += baseten;
+            var baseten = char.charCodeAt(0); //get base10 integer of char code
+            var basetwo = baseten.toString(2); //convert to base2 string
+            basetwo = this.padLeft(basetwo, 7, "0"); //add 0s to the left until the string is of length 7 (2^7 is 128 which covers ascii)
+            console.log("Pushing " + basetwo);
+            holder =  basetwo + holder;
         }
+        holder = "1" + holder + "1"; //make sure we can identify leading and trailing 0's
         console.log(holder);
-        holder = BigInt(holder);
-        console.log(holder);
-        holder = holder.toString(this.encodeBitDepth);
-        holder = "1" + holder;
-        console.log(holder);
-        this.encodeMessage = holder;
+        var aggrten = this.baseToBigInt(holder, 2);
+        console.log("aggr10", aggrten);
+        var aggreleven = aggrten.toString(11);
+        console.log("aggr11", aggreleven);
+        
+        this.encodeMessage = aggreleven;
 
         //rebuild message with new spaces
         var words = this.encodeMedium.split(" ");
@@ -96,7 +86,7 @@ export class Steganography
             var space = "";
             if(i >= this.encodeMessage.length)
             {
-                space = this.getRelativeSpace("0");
+                space = " ";
             }
             else
             {
@@ -122,49 +112,60 @@ export class Steganography
 
     getRelativeSpace(num)
     {
-        console.log("getting relative space " + num);
         var holder = "";
         var index = parseInt(num, this.encodeBitDepth);
-        console.log("relative space interpereted as " + index);
-        holder += String.fromCodePoint(this.encodeSpaces[index]);
+        console.log("using space [" + num + "] - U+" + this.padLeft(this.encodeSpaces[index].charCodeAt(0).toString(16), 4, "0"));
+        holder += this.encodeSpaces[index];
         return holder;
     }
 
     decode()
     {
-        //define the spaces that will be used for decoding
-        var input = document.getElementById("decode_spaces").value;
-        var holder = new Array();
-        for(var char of input)
-        {
-            holder.push(char.charCodeAt(0));
-        }
-        holder = holder.filter(function(elem, index, self) {return index === self.indexOf(elem);});
-        holder = holder.sort();
-        this.decodeSpaces = holder;
-        this.decodeBitDepth = this.decodeSpaces.length;
-
         //extract all spaces from the text
         var foundSpaces = "";
         for(var char of this.decodeRaw)
         {
-            if(-1 != this.decodeSpaces.indexOf(char.charCodeAt(0)))
+            if(-1 != this.decodeSpaces.indexOf(char))
             {
                 foundSpaces += char;
             }
         }
-        this.decodeRaw = foundSpaces.substring(1);
+        console.log("found spaces", foundSpaces.length);
+        this.decodeRaw = foundSpaces;
 
         //convert the decodeRaw into a baseN number
         var digits = "";
         console.log(this.decodeRaw, this.decodeRaw.length);
         for(var char of this.decodeRaw)
         {
-            digits += this.decodeSpaces.indexOf(char.charCodeAt(0)).toString(this.decodeBitDepth);
+            digits += this.decodeSpaces.indexOf(char).toString(this.decodeBitDepth);
         }
+        console.log(digits);
+        digits = digits.replace(/0+$/gm, "");
+        console.log("digits", digits);
         this.decodeRaw = digits;
+    
         this.decodeRaw = this.baseToBigInt(this.decodeRaw, this.decodeBitDepth);
-        this.decodeRaw = this.decodeRaw.toString(10);
+        this.decodeRaw = this.decodeRaw.toString(2);
+        this.decodeRaw = this.decodeRaw.substring(1, this.decodeRaw.length - 1);
+
+        var regions = new Array();
+        for(var i = 0; i < this.decodeRaw.length; i += 7)
+        {
+            var region = this.decodeRaw.substring(i, i + 7);
+            region = Number.parseInt(region, 2);
+            region = region.toString(10);
+            regions.push(region);
+        }
+        regions = regions.reverse();
+        this.decodeRaw = regions; //flip it around because we added new digits to the most significant side
+
+        this.decodeResult = "";
+        for(var character of this.decodeRaw)
+        {
+            this.decodeResult += String.fromCodePoint(character);
+        }
+        this.decodeResult = decodeURIComponent(this.decodeResult) //undo URI encoding!
 
         //return to main execution loop
         this.execution("DECODE_RESULT");
@@ -173,7 +174,8 @@ export class Steganography
     baseToBigInt(numberString, base) {
         let result = BigInt(0);
         for (let i = 0; i < numberString.length; i++) {
-            let digit = BigInt(numberString[i]);
+            console.log("parsing " + numberString[i]);
+            let digit = BigInt(Number.parseInt(numberString[i],this.decodeBitDepth));
             result += digit * BigInt(base) ** BigInt(numberString.length - i - 1);
         }
         return result;
