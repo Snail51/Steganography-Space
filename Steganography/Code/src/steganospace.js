@@ -293,3 +293,19 @@ class Reader
      
 }
 
+class Compressor
+{
+    static compress(original) {
+        //compress inbound string/file, return outBound
+        compact = pako.deflate(original, { level: 9, to: 'string'});
+        return compact;
+    }
+
+    static decompress(compact){
+        //decompress sourceFile, return original
+        //the critical bit here lol
+        orignal = pako.inflate(compact, { to: 'string' });
+        return original;
+    }
+}
+
