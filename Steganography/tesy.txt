@@ -1,9 +1,0 @@
-[
-BBAB{
-BBBABBAB"type":A"message",
-ABAABAAA"subtype":A"channel_join",
-AAAAAAAA"ts":A"1693193164.276039",
-AAAAAAAA"user":A"U05PPECSF5Y",
-AAAAAAAA"text":A"<@U05PPECSF5Y>AhasAjoinedAtheAchannel"
-AAAA}
-]A
