@@ -43,50 +43,74 @@ export class Steganography
         }
         switch (this.state)
         {
-            case "ENCODE_READ": //we still need to read the data
-                this.preRead("encode_medium", "encodeMedium", "ENCODE_PROCESS");
+            case "ENCODE_READ_ONE": //read the medium/cover
+                this.preRead("encode_medium", "encodeMedium", "ENCODE_READ_TWO");
+                break;
+            case "ENCODE_READ_TWO": //read the message
+                this.preRead("encode_message", "encodeMessage", "ENCODE_PROCESS");
                 break;
             case "DECODE_READ": //we still need to turn it into smart objects
                 this.preRead("decode_medium", "decodeRaw", "DECODE_PROCESS");
                 break;
             case "ENCODE_PROCESS": //we still need to actually process the data into week-by-week reports
+                //console.log("medium", this.encodeMedium);
                 this.encode();
                 break;
             case "DECODE_PROCESS": //write our result to the page
                 this.decode();
                 break;
             case "ENCODE_RESULT": //write our result to the page
-                document.getElementById("result").innerHTML = this.encodeResult;
+                var blob = new Blob([this.encodeResult], {type: document.getElementById("encode_medium").files[0].type});
+                var url = URL.createObjectURL(blob);
+                var downloadLink = document.getElementById("download");
+                downloadLink.href = url;
+                downloadLink.download = document.getElementById("encode_medium").files[0].name;
+                downloadLink.innerHTML = document.getElementById("encode_medium").files[0].name;
                 break;
             case "DECODE_RESULT": //write our result to the page
-            document.getElementById("result").innerHTML = this.decodeResult;
+                var blob = new Blob([this.decodeResult.data], {type: this.decodeResult.type});
+                var url = URL.createObjectURL(blob);
+                var downloadLink = document.getElementById("download");
+                downloadLink.href = url;
+                downloadLink.download = this.decodeResult.name;
+                downloadLink.innerHTML = this.decodeResult.name;
                 break;
             default:
                 console.warn("Unkown switch case " + this.state + " reached!");
         }
     }
 
-    encode()
+    async encode()
     {
         //build our message
-        this.encodeMessage = document.getElementById("encode_message").value;
-        this.encodeMessage = encodeURIComponent(this.encodeMessage);
-        console.log(this.encodeMessage);
+        this.encodeMessage = maxEncode(this.encodeMessage);
+        this.encodeMessage = this.encodeMessage.substring(0, this.encodeMessage.length-2);
+        var json = ({
+            name: document.getElementById("encode_message").files[0].name,
+            type: document.getElementById("encode_message").files[0].type,
+            size: document.getElementById("encode_message").files[0].size,
+            data: this.encodeMessage
+        });
+        console.log("encode", JSON.stringify(json));
+        this.encodeMessage = JSON.stringify(json);
+        this.encodeMessage = maxEncode(this.encodeMessage);
+
+        //console.log(this.encodeMessage);
         var holder = "";
         for(var char of this.encodeMessage)
         {
             var baseten = char.charCodeAt(0); //get base10 integer of char code
             var basetwo = baseten.toString(2); //convert to base2 string
-            basetwo = this.padLeft(basetwo, 7, "0"); //add 0s to the left until the string is of length 7 (2^7 is 128 which covers ascii)
-            console.log("Pushing " + basetwo);
+            basetwo = this.padLeft(basetwo, 8, "0"); //add 0s to the left until the string is of length 8
+            //console.log("Pushing " + basetwo);
             holder =  basetwo + holder;
         }
         holder = "1" + holder + "1"; //make sure we can identify leading and trailing 0's
-        console.log(holder);
+        //console.log(holder);
         var aggrten = this.baseToBigInt(holder, 2);
-        console.log("aggr10", aggrten);
+        //console.log("aggr10", aggrten);
         var aggreleven = aggrten.toString(11);
-        console.log("aggr11", aggreleven);
+        //console.log("aggr11", aggreleven);
         
         this.encodeMessage = aggreleven;
 
@@ -98,28 +122,68 @@ export class Steganography
             return;
         }
 
-        document.getElementById("result").innerHTML = "Calculating... Please Wait.";
+        document.getElementById("progress").innerHTML = "Calculating... Please Wait.";
 
         var messIndex = 0;
         var holder = "";
-        for(var i = 0; i < words.length; i++)
+        var exitNow = false;
+        var boundary = nthOccurrence(this.encodeMedium, " ", this.encodeMessage.length);
+        for(var i = 0; i < words.length && !exitNow; i++)
         {
+            document.getElementById("progress").innerHTML = "Calculating... Progress: " + (i/this.encodeMessage.length).toString().substring(0,4);
             var space = "";
             if(i >= this.encodeMessage.length)
             {
-                space = this.spaces[0];
+                var postBorder = this.encodeMedium.substring(boundary);
+                document.getElementById("progress").innerHTML = "Finalizing... please wait";
+                await sleep(1000);
+                postBorder = postBorder.replace(/\ /gm, this.spaces[0]);
+                holder += postBorder;
+                exitNow = true;
+                document.getElementById("progress").innerHTML = "Message ready for Download";
             }
             else
             {
                 space = this.getRelativeSpace(this.encodeMessage[messIndex]);
+                holder += words[i] + space;
+                messIndex++;
             }
-            holder += words[i] + space;
-            messIndex++;
+            await sleep(1);
         }
         this.encodeResult = holder;
 
         //return to main execution loop
         this.execution("ENCODE_RESULT");
+
+        function sleep(ms)
+        {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function nthOccurrence(text, char, nth) {
+            var pos = -1;
+            var index = 0;
+            while (index < nth) {
+                pos = text.indexOf(char, pos + 1);
+                if (pos === -1) {
+                    break;
+                }
+                index++;
+            }
+            return pos;
+        }
+
+        function maxEncode(string)
+        {
+            var result = "";
+            let arr = Array.from(string);
+            arr.forEach((char) => {
+                var val = char.codePointAt(0);
+                val = val.toString(16);
+                result += "%" + val;
+            });
+            return result;
+        }
     }
 
     padLeft(string, length, pad)
@@ -135,14 +199,17 @@ export class Steganography
     {
         var holder = "";
         var index = parseInt(num, this.encodeBitDepth);
-        console.log("using space [" + num + "] - U+" + this.padLeft(this.spaces[index].charCodeAt(0).toString(16), 4, "0"));
+        //console.log("using space [" + num + "] - U+" + this.padLeft(this.spaces[index].charCodeAt(0).toString(16), 4, "0"));
         holder += this.spaces[index];
         return holder;
     }
 
     decode()
     {
-        document.getElementById("result").innerHTML = "Calculating... Please Wait.";
+        document.getElementById("progress").innerHTML = "Calculating... Please Wait.";
+        this.decodeRaw = maxDecode(this.decodeRaw);
+        //this.decodeRaw = stringToUTF8(this.decodeRaw);
+        //console.log(this.decodeRaw);
         
         //extract all spaces from the text
         var foundSpaces = "";
@@ -153,29 +220,31 @@ export class Steganography
                 foundSpaces += char;
             }
         }
-        console.log("found spaces", foundSpaces.length);
+        //console.log("found spaces", foundSpaces.length);
         this.decodeRaw = foundSpaces;
 
         //convert the decodeRaw into a baseN number
         var digits = "";
-        console.log(this.decodeRaw, this.decodeRaw.length);
+        //console.log(this.decodeRaw, this.decodeRaw.length);
         for(var char of this.decodeRaw)
         {
             digits += this.spaces.indexOf(char).toString(this.decodeBitDepth);
         }
-        console.log(digits);
+        //console.log(digits);
         digits = digits.replace(/0+$/gm, "");
-        console.log("digits", digits);
+        //console.log("digits", digits);
         this.decodeRaw = digits;
     
         this.decodeRaw = this.baseToBigInt(this.decodeRaw, this.decodeBitDepth);
         this.decodeRaw = this.decodeRaw.toString(2);
         this.decodeRaw = this.decodeRaw.substring(1, this.decodeRaw.length - 1);
 
+        //console.log("HERE", this.decodeRaw);
+
         var regions = new Array();
-        for(var i = 0; i < this.decodeRaw.length; i += 7)
+        for(var i = 0; i < this.decodeRaw.length; i += 8)
         {
-            var region = this.decodeRaw.substring(i, i + 7);
+            var region = this.decodeRaw.substring(i, i + 8);
             region = Number.parseInt(region, 2);
             region = region.toString(10);
             regions.push(region);
@@ -188,16 +257,29 @@ export class Steganography
         {
             this.decodeResult += String.fromCodePoint(character);
         }
-        this.decodeResult = decodeURIComponent(this.decodeResult) //undo URI encoding!
+        this.decodeResult = JSON.parse(this.decodeResult);
+        this.decodeResult.data = maxDecode(this.decodeResult.data);
+        //console.log(this.decodeResult);
 
         //return to main execution loop
         this.execution("DECODE_RESULT");
+
+        function maxDecode(string) {
+            let result = "";
+            let arr = string.split("%");
+            arr.shift(); // Remove the first element which is an empty string due to split("%")
+            arr.forEach((val) => {
+                var char = parseInt(val, 16);
+                result += String.fromCharCode(char);
+            });
+            return result;
+        }        
     }
 
     baseToBigInt(numberString, base) {
         let result = BigInt(0);
         for (let i = 0; i < numberString.length; i++) {
-            console.log("parsing " + numberString[i]);
+            //console.log("parsing " + numberString[i]);
             let digit = BigInt(Number.parseInt(numberString[i],this.decodeBitDepth));
             result += digit * BigInt(base) ** BigInt(numberString.length - i - 1);
         }
@@ -245,7 +327,7 @@ class Reader
         this.files = document.getElementById(formId).files;
         if(this.files == null)
         {
-            console.error("Element with ID " + formId + " does not have a .files attribute!");
+            //console.error("Element with ID " + formId + " does not have a .files attribute!");
             this.result = "ERROR_NO-ATTRIBUTE";
             return;
         }
@@ -253,7 +335,7 @@ class Reader
         {
             if(this.files.length == 0)
             {
-                console.error("Element with ID " + formId + " has 0 files assigned!");
+                //console.error("Element with ID " + formId + " has 0 files assigned!");
                 this.result = "ERROR_NO-FILES";
                 return;
             }
@@ -287,10 +369,9 @@ class Reader
             this.state = "RUNNING";
             for (let i = 0; i < results.length; i++)
             {
-                results[i] = results[i].substring(2, results[i].length-2);
+                results[i] = results[i];//.substring(2, results[i].length-2);
                 this.result += results[i] + "\,\n";
             }
-            this.result = "\[\n" + this.result.substring(0, this.result.length-2) + "\n\]";
             this.state = "DONE";
             this.callback();
         });
