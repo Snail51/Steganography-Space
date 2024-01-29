@@ -1,0 +1,105 @@
+<html>
+  <style>
+    @font-face 
+    {
+      font-family: 'Unifont-Bottom';
+      src: 
+        url('https://lars.d.umn.edu/brendan/Steganography/Resources/Unifont_Bottom.otf') format('opentype'),
+    }
+    @font-face 
+    {
+      font-family: 'Unifont-Top';
+      src: 
+        url('https://lars.d.umn.edu/brendan/Steganography/Resources/Unifont_Top.otf') format('opentype'),
+    }
+    @font-face 
+    {
+      font-family: 'Noto-Historic';
+      src: 
+        url('https://lars.d.umn.edu/brendan/Steganography/Resources/Noto_Historic.ttf') format('truetype'),
+    }
+    @font-face 
+    {
+      font-family: 'Noto-Living';
+      src: 
+        url('https://lars.d.umn.edu/brendan/Steganography/Resources/Noto_Living.ttf') format('truetype'),
+    }
+    .c
+    {
+      width: 5vw;
+      justify-content: center;
+    }
+  </style>
+  <body style="font-family: Noto-Living, Noto-Historic, Unifont-Top, Unifont-Bottom">
+    <h1>Better Unicode Viewer</h1>
+    <p>Plenty of websites exist on the internet that will allow you to view all of unicode, but many of these are incomplete and/or don't include additional resources your browser needs to actually properly render all glyphs. This webpage forces the client to download <a href="https://unifoundry.com/unifont/index.html">the GNU Unifont</a> and <a href="https://github.com/notofonts/notofonts.github.io">megamerge of notofonts</a>, fonts that explicitly include all glyphs defined in Unicode. This ensures your browser is actually able to display all glyphs. You may need to disable browser extensions to avoid running out of memory loading this page. You may also find use with <a href="https://torinak.com/font/lsfont.html">the font viewing tool here</a></p>.
+    <h1>All of Unicode as a Table</h1>
+    <table id="t" style="font-size: 24px;"><tbody id="tb"></tbody></table>
+    
+      
+
+    <script>
+
+      function sleep(ms)
+      {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      function padLeft(string, length, pad)
+      {
+          while(string.length < length)
+          {
+              string = pad + string;
+          }
+          return string;
+      }
+      
+      async function buildTable()
+      {
+        for(var i = 0; i < 1048575; i+= 16)
+        {
+          document.getElementById("tb").innerHTML += "<tr><th>" + padLeft(i.toString(16), 5, "0") + "</th><td class='c'>" + String.fromCodePoint(i) + "</td><td class='c'>" + String.fromCodePoint(i + 1) + "</td><td class='c'>" + String.fromCodePoint(i+2) + "</td><td class='c'>" + String.fromCodePoint(i+3) + "</td><td class='c'>" + String.fromCodePoint(i+4) + "</td><td class='c'>" + String.fromCodePoint(i+5) + "</td><td class='c'>" + String.fromCodePoint(i+6) + "</td><td class='c'>" + String.fromCodePoint(i+7) + "</td><td class='c'>" + String.fromCodePoint(i+8) + "</td><td class='c'>" + String.fromCodePoint(i+9) + "</td><td class='c'>" + String.fromCodePoint(i+10) + "</td><td class='c'>" + String.fromCodePoint(i+11) + "</td><td class='c'>" + String.fromCodePoint(i+12) + "</td><td class='c'>" + String.fromCodePoint(i+13) + "</td><td class='c'>" + String.fromCodePoint(i+14) + "</td><td class='c'>" + String.fromCodePoint(i+15) + "</td></tr>";
+          await sleep(80);
+        }
+      }
+
+      async function buildString()
+      {
+        for(var i = 0; i < 1048575; i++)
+        {
+          document.getElementById("unistring").innerHTML += String.fromCodePoint(i);
+          await sleep(10);
+        }
+      }
+      setTimeout(function(){buildTable()}, 30000)
+      setTimeout(function(){buildString()}, 30000)
+
+      function copyString()
+      {
+        console.log("copying...");
+        var unistring = "";
+        for(var i = 0; i < 1048575; i++)
+        {
+          unistring += String.fromCodePoint(i);
+        }
+        // Check if the Clipboard API is supported
+        if (navigator.clipboard)
+        {
+          // Write the text to the clipboard
+          navigator.clipboard.writeText(unistring)
+            .then(() => {
+              alert("Text successfully copied to clipboard");
+            })
+            .catch(err => {
+              alert("Unable to copy text to clipboard", err);
+            });
+        } else 
+        {
+          alert("Clipboard API not supported in this browser");
+        }
+      }
+    </script>
+    <h1>All of Unicode as a String</h1> <button onclick="copyString()">Copy to Clipboard</button>
+    <p id="unistring" style="width:97.5vw; overflow-wrap: break-word;"></p>
+    </body>
+</html>

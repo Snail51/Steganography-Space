@@ -35,6 +35,7 @@
         
         
         <hr>
+        <button onClick="copy()">Copy to Clipboard</button>
         <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(RESULT WILL GO HERE UPON EXECUTION)</pre>
         
         <script type="module">
@@ -47,6 +48,27 @@
             function navigateRoot()
             {
                 window.location.href = "./index.html";
+            }
+            function copy()
+            {
+                console.log("copying...");
+                var data = document.getElementById("result").innerHTML;
+                // Check if the Clipboard API is supported
+                if (navigator.clipboard)
+                {
+                    // Write the text to the clipboard
+                    navigator.clipboard.writeText(data)
+                    .then(() => {
+                    alert("Text successfully copied to clipboard");
+                    })
+                    .catch(err => {
+                    alert("Unable to copy text to clipboard", err);
+                    });
+                } 
+                else 
+                {
+                alert("Clipboard API not supported in this browser");
+                }
             }
         </script>
 

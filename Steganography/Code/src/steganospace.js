@@ -5,16 +5,34 @@ export class Steganography
         this.state = "NOT_INIT";
         this.reader = new Reader();
 
+
+
         this.encodeMedium = "";
         this.encodeMessage = "";
-        this.encodeSpaces = "⓪①②③④⑤⑥⑦⑧⑨Ⓐ\u0020\u00A0\u2000\u2002\u2004\u2005\u2006\u2008\u2009\u202F\u205F";
         this.encodeBitDepth = 11;
         this.encodeResult = "";
 
         this.decodeRaw = "";
-        this.decodeSpaces = "⓪①②③④⑤⑥⑦⑧⑨Ⓐ\u0020\u00A0\u2000\u2002\u2004\u2005\u2006\u2008\u2009\u202F\u205F";
         this.decodeBitDepth = 11;
         this.decodeResult = "";
+
+
+        //decide what spaces will be used
+        this.spaces = "";
+        this.spaceType = "BILLIARDS"; //SPACE, BILLIARDS
+        switch(this.spaceType)
+        {
+            case "BILLIARDS":
+                this.spaces = "⓪①②③④⑤⑥⑦⑧⑨Ⓐ";
+                break;
+            case "SPACE":
+                this.spaces = "\u0020\u00A0\u2000\u2002\u2004\u2005\u2006\u2008\u2009\u202F\u205F";
+                break;
+            default:
+                console.error("Invalid spaceType set in steganospace constructor");
+                this.spaces = null;
+                break;
+        }
     }
 
     execution(newState)
@@ -79,6 +97,9 @@ export class Steganography
             alert("Steganographic Medium is not large enough to support this message! Aborting!\nAttempted to fit " + this.encodeMessage.length + " characters into " + words.length + " spaces. Add more space characters or increase the medium size.");
             return;
         }
+
+        document.getElementById("result").innerHTML = "Calculating... Please Wait.";
+
         var messIndex = 0;
         var holder = "";
         for(var i = 0; i < words.length; i++)
@@ -86,7 +107,7 @@ export class Steganography
             var space = "";
             if(i >= this.encodeMessage.length)
             {
-                space = " ";
+                space = this.spaces[0];
             }
             else
             {
@@ -114,18 +135,20 @@ export class Steganography
     {
         var holder = "";
         var index = parseInt(num, this.encodeBitDepth);
-        console.log("using space [" + num + "] - U+" + this.padLeft(this.encodeSpaces[index].charCodeAt(0).toString(16), 4, "0"));
-        holder += this.encodeSpaces[index];
+        console.log("using space [" + num + "] - U+" + this.padLeft(this.spaces[index].charCodeAt(0).toString(16), 4, "0"));
+        holder += this.spaces[index];
         return holder;
     }
 
     decode()
     {
+        document.getElementById("result").innerHTML = "Calculating... Please Wait.";
+        
         //extract all spaces from the text
         var foundSpaces = "";
         for(var char of this.decodeRaw)
         {
-            if(-1 != this.decodeSpaces.indexOf(char))
+            if(-1 != this.spaces.indexOf(char))
             {
                 foundSpaces += char;
             }
@@ -138,7 +161,7 @@ export class Steganography
         console.log(this.decodeRaw, this.decodeRaw.length);
         for(var char of this.decodeRaw)
         {
-            digits += this.decodeSpaces.indexOf(char).toString(this.decodeBitDepth);
+            digits += this.spaces.indexOf(char).toString(this.decodeBitDepth);
         }
         console.log(digits);
         digits = digits.replace(/0+$/gm, "");
