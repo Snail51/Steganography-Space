@@ -13,7 +13,7 @@ export class URICompression
      * @return - Returns a compressed version of the data in base64
      * @note - Function takes care to properly encode the text to handle the U8Int limitations of pajo.js.
      */
-    compress(str)
+    static compress(str)
     {
 
     }
@@ -25,7 +25,7 @@ export class URICompression
      * @return - Returns the raw string (UTF-32) representation of the comressed data
      * @note - Preforms decodeURIcomponent-- result string must be assumed to be UTF-32
      */
-    decompress(base64str)
+    static decompress(base64str)
     {
 
     }
