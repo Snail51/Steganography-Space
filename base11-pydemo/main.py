@@ -1,40 +1,35 @@
 from typing import List
 import numpy as np
 
-
-spaces = ["\u0020","\u00a0","\u2000","\u2002","\u2004",
+SPACES = ["\u0020","\u00a0","\u2000","\u2002","\u2004",
           "\u2005","\u2006","\u2008","\u2009","\u202F","\u205F"]
 
 def str_to_base11(string: str) -> List[int]:
     result = []
-    for num in string:
-        bin_repr = np.binary_repr(ord(num))
-        for i in range(0,len(bin_repr) - 4):
-            exp = 3 #garbage
-            total = 0
-            substr = '' #lnai
-            for j in range(i,i+4): 
-                val = (2 ** exp) * int(bin_repr[j]) #garbage
-                total += val
-                substr += bin_repr[j]
-                exp -= 1
-            if total >= 11: #garbage
-                result.append(bin(10))
-                result.append(bin(total - 10))
+    for char in string:
+        bin_repr = np.binary_repr(ord(char))
+        i = 0
+        while i < (len(bin_repr) - 4):
+            substr = bin_repr[i : i+4]
+            ordinal = int(substr, base=2)
+            if ordinal >= 11: 
+                result += [bin(10),bin(ordinal-10)]
             else:
-                result.append(bin_repr[i:i+4])
-    result = [int (r,base=2) for r in result]
-    return result
+                result.append(substr)
+            i += 4
+        remainder = ''
+        while i < len(bin_repr):
+            remainder += bin_repr[i]
+            i += 1
+        remainder += '0'
+    return [int(r,base=2) for r in result]
 
 def substitute_base11(base11_ints: List[int]) -> List[str]:
-    return [spaces[i] for i in base11_ints]
-
-
+    return [SPACES[i] for i in base11_ints]
 
 if __name__ == "__main__":
-    nums = [ord(c) for c in spaces]
     base11_convert = str_to_base11("hello")
-    
+    print(base11_convert)
     result = substitute_base11(base11_convert)
     result
 #a, aaaaaaaaaaaaaaa. a
