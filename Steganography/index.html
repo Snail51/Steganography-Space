@@ -15,13 +15,10 @@
                     <hr>
                     <p style="display: block; width: 95%;;">Select Steganographic Medium:</p>
                     <input type="file" id="encode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <p style="display: block; width: 95%;">Type all space characters you wish to use:</p>
-                    <textarea id="encode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateEncodeDepth()"></textarea>
-                    <i id="encode_bitdepth" style="display: block; width: 95%; resize: none;">Encoder will use bit depth of 0</i>
-                    <p style="display: block; width: 95%;">Type the message you wish to encode:</p>
-                    <textarea id="encode_message" style="width: 95%; resize: none; white-space: pre;"></textarea>
+                    <p style="display: block; width: 95%;">Select the message you wish to encode:</p>
+                    <input type="file" id="encode_message" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
                     <pre></pre>
-                    <button type="button" onclick="window.main.execution('ENCODE_READ')" style="font-size: 24px; display: block;">Encode</button>
+                    <button type="button" onclick="window.main.execution('ENCODE_READ_ONE')" style="font-size: 24px; display: block;">Encode</button>
                 </form>
             </div>
             <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
@@ -30,8 +27,6 @@
                     <hr>
                     <p style="display: block; width: 95%;">Select Text with Steganographic Data:</p>
                     <input type="file" id="decode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <textarea id="decode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateDecodeDepth()"></textarea>
-                    <i id="decode_bitdepth" style="display: block; width: 95%;">Decoder will use bit depth of 0</i>
                     <pre></pre>
                     <button type="button" onclick="window.main.execution('DECODE_READ')" style="font-size: 24px; display: block;">Decode</button>
                 </form>
@@ -40,8 +35,10 @@
         
         
         <hr>
-        <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(RESULT WILL GO HERE UPON EXECUTION)</pre>
-        
+        <button onClick="copy()">Copy to Clipboard</button>
+        <pre id="progress" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(PROGRESS)</pre>
+        <a id="download" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; color: cyan;">(DOWNLOAD LINK)</a>
+
         <script type="module">
             import { Steganography } from "./Code/src/steganospace.js";
             var Main = new Steganography();
@@ -52,6 +49,27 @@
             function navigateRoot()
             {
                 window.location.href = "./index.html";
+            }
+            function copy()
+            {
+                console.log("copying...");
+                var data = document.getElementById("result").innerHTML;
+                // Check if the Clipboard API is supported
+                if (navigator.clipboard)
+                {
+                    // Write the text to the clipboard
+                    navigator.clipboard.writeText(data)
+                    .then(() => {
+                    alert("Text successfully copied to clipboard");
+                    })
+                    .catch(err => {
+                    alert("Unable to copy text to clipboard", err);
+                    });
+                } 
+                else 
+                {
+                alert("Clipboard API not supported in this browser");
+                }
             }
         </script>
 
