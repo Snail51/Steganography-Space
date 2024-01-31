@@ -399,19 +399,29 @@ class Reader
      
 }
 
-class Compressor
-{
+class Compressor{
+
     static compress(original) {
         //compress inbound string/file, return outBound
-        compact = pako.deflate(original, { level: 9, to: 'string'});
-        return compact;
+        try{
+            const compact =pako.deflate(original, { level: 9, to: 'Uint8Array'});
+            return compact;
+        }catch(error){
+            console.error('Compression error detected:', error.message);
+            return null;
+        }
     }
 
     static decompress(compact){
         //decompress sourceFile, return original
-        //the critical bit here lol
-        orignal = pako.inflate(compact, { to: 'string' });
+        try{
+        orignal = pako.inflate(compact, { to: 'Uint8Array' });
         return original;
+        }catch(error){
+            console.error('Compression error detected:', error.message);
+            return null;
+        }
+
     }
 }
 
