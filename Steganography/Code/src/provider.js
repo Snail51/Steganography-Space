@@ -1,4 +1,8 @@
-//This class provides a standard way to provide files to the user for download
+/**
+ * The Provider class embeds itself to the <a> element with the given Id, and mannages it.
+ * It is capable of creating new tmp files from provided data and serving them to the client.
+ * It is also capable of releasing previously served files to not waste memory.
+ */
 export class Provider
 {
     constructor(linkElementId)
@@ -13,18 +17,25 @@ export class Provider
      */
     clear()
     {
-
+        URL.revokeObjectURL(this.serve);
+        this.element.href = null;
+        this.element.download = null;
+        this.element.innerHTML = "";
     }
 
     /**
      * Produces a blob with the given data, type, and name, and makes download of that blob
      * avilible at the link element bound to the class.
-     * @param data - String or Bytes representing the file's data
-     * @param type - The type parameter specifies the type of data that is being provided. EX: text/plain.
      * @param name - The default name the file will have for download.
+     * @param type - The type parameter specifies the type of data that is being provided. EX: text/plain.
+     * @param data - String or Bytes representing the file's data
      */
-    provide(data, type, name)
+    provide(name, type, data)
     {
-
+        var blob = new Blob([data], {type});
+        this.serve = URL.createObjectURL(blob);
+        this.element.href = this.serve;
+        this.element.download = name;
+        this.element.innerHTML = name;
     }
 }
