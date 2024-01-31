@@ -11,8 +11,10 @@
         <div>
             <button onclick="window.functions[0]()">Single Bytes</button>
             <button onclick="window.functions[1]()">Single Text</button>
-            <button onclick="window.functions[2]()">Multiple Bytes</button>
-            <button onclick="window.functions[3]()">MultipleText</button>
+            <button onclick="window.functions[2]()">Single Binary</button>
+            <button onclick="window.functions[3]()">Multiple Bytes</button>
+            <button onclick="window.functions[4]()">Multiple Text</button>
+            <button onclick="window.functions[5]()">Multiple Binary</button>
         </div>
         <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
         <button id="continue" onclick="proceed()" disabled="true">Execute</button>
@@ -37,6 +39,12 @@
             });
             window.functions.push(async function()
             {
+                var obj = await window.main.readSingleAsBinary();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+            window.functions.push(async function()
+            {
                 var obj = await window.main.readMultipleAsBytes();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
@@ -44,6 +52,12 @@
             window.functions.push(async function()
             {
                 var obj = await window.main.readMultipleAsText();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+            window.functions.push(async function()
+            {
+                var obj = await window.main.readMultipleAsBinary();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
             });

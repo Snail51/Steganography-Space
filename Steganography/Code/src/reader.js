@@ -9,11 +9,11 @@ export class Reader
     }
 
     /**
-     * The `readSingleAsBytes()` method is used to read the content of a single file linked
+     * The `readSingleAsBinary()` method is used to read the content of a single file linked
      * to this object as an array of bytes. It is typically used when dealing with binary files.
-     * @result this.value will become populated (non-null) once read is complete.
+     * @result returns a file descriptor with data = a Uint8array as a string%8==0
      */
-    async readSingleAsBytes()
+    async readSingleAsBinary()
     {
         this.done = false;
         var file = this.collectMetadata(this.element.files[0]);
@@ -23,9 +23,23 @@ export class Reader
     }
 
     /**
+     * The `readSingleAsBytes()` method is used to read the content of a single file linked
+     * to this object as an array of bytes. It is typically used when dealing with binary files.
+     * @result returns a file descriptor with data = a Uint8array.
+     */
+    async readSingleAsBytes()
+    {
+        this.done = false;
+        var file = this.collectMetadata(this.element.files[0]);
+        file.data = await this.byteRead(this.element.files[0]);
+        this.done = true;
+        return file;
+    }
+
+    /**
      * The `readSingleAsText()` method is used to read the content of a single file linked
      * to this object as text.
-     * @result this.value will become populated (non-null) once read is complete.
+     * @result returns a file descriptor with data = a Uint8array as text.
      */
     async readSingleAsText()
     {
@@ -37,11 +51,11 @@ export class Reader
     }
 
     /**
-     * The `readMultipleAsBytes()` method is used to read the content of all files linked
+     * The `readMultipleAsBinary()` method is used to read the content of all files linked
      * to this object as an array of Byte arrays. It is typically used when dealing with binary files.
-     * @result this.value will become populated (non-null) once read is complete.
+     * @result returns an array of file descriptors with data = a Uint8array as a string%8==0
      */
-    async readMultipleAsBytes()
+    async readMultipleAsBinary()
     {
         this.done = false;
         var multiple = new Array();
@@ -56,9 +70,28 @@ export class Reader
     }
 
     /**
+     * The `readMultipleAsBytes()` method is used to read the content of all files linked
+     * to this object as an array of Byte arrays. It is typically used when dealing with binary files.
+     * @result returns an array of file descriptors with data = a Uint8array.
+     */
+    async readMultipleAsBytes()
+    {
+        this.done = false;
+        var multiple = new Array();
+        for(var file of this.element.files)
+        {
+            var single = this.collectMetadata(file);
+            single.data = await this.byteRead(file);
+            multiple.push(single);
+        }
+        this.done = true;
+        return multiple;
+    }
+
+    /**
      * The `readMultipleAsText()` method is used to read the content of all files linked
      * to this object as an array of Text arrays.
-     * @result this.value will become populated (non-null) once read is complete.
+     * @result returns an array of file descriptors with data = a Uint8array as text
      */
     async readMultipleAsText()
     {
@@ -119,7 +152,7 @@ export class Reader
      * The function `binaryRead` reads the contents of a file and returns it as a binary string.
      * @param file - The "file" parameter is the file object that you want to read. It could be a file
      * selected by the user through an input element or obtained from any other source.
-     * @returns the variable "data", which is the file's contents.
+     * @returns the variable "data", which is the file's contents as Uint8array as string%8==0
      */
     async binaryRead(file)
     {
@@ -143,7 +176,7 @@ export class Reader
                 b = padLeft(b, 8, "0");
                 result += b;
             }
-            this.data = result
+            this.data = result;
 
             function padLeft(string, length, pad)
             {
@@ -154,6 +187,32 @@ export class Reader
                 }
                 return result;
             }
+        });
+        return this.data
+    }
+
+    /**
+     * The function `byteRead` reads the contents of a file and returns it as a binary string.
+     * @param file - The "file" parameter is the file object that you want to read. It could be a file
+     * selected by the user through an input element or obtained from any other source.
+     * @returns the variable "data", which is the file's contents as Uint8array.
+     */
+    async byteRead(file)
+    {
+        this.data = "";
+        var readingPromise = new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                resolve(e.target.result);
+            };
+            reader.onerror = function(e) {
+                reject(e);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        await readingPromise.then((results) => {
+            var holder = new Uint8Array(results);
+            this.data = holder;
         });
         return this.data
     }
