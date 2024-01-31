@@ -8,44 +8,21 @@
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
         <pre></pre>
         <hr>
-        <div style="display: flex;">
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Encoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;;">Select Steganographic Medium:</p>
-                    <input type="file" id="encode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <p style="display: block; width: 95%;">Type all space characters you wish to use:</p>
-                    <textarea id="encode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateEncodeDepth()"></textarea>
-                    <i id="encode_bitdepth" style="display: block; width: 95%; resize: none;">Encoder will use bit depth of 0</i>
-                    <p style="display: block; width: 95%;">Type the message you wish to encode:</p>
-                    <textarea id="encode_message" style="width: 95%; resize: none; white-space: pre;"></textarea>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('ENCODE_READ')" style="font-size: 24px; display: block;">Encode</button>
-                </form>
-            </div>
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Decoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;">Select Text with Steganographic Data:</p>
-                    <input type="file" id="decode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <textarea id="decode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateDecodeDepth()"></textarea>
-                    <i id="decode_bitdepth" style="display: block; width: 95%;">Decoder will use bit depth of 0</i>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('DECODE_READ')" style="font-size: 24px; display: block;">Decode</button>
-                </form>
-            </div>
-        </div>
-        
-        
-        <hr>
-        <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(RESULT WILL GO HERE UPON EXECUTION)</pre>
         
         <script type="module">
-            import { Steganography } from "./Code/src/steganospace.js";
-            var Main = new Steganography();
-            window.main = Main;
+            import { URICompressor } from "./Code/src/compression.js";
+            window.compress = function(data)
+            {
+                var holder = URICompressor.compress(data);
+                console.log(holder);
+                return holder;
+            }
+            window.decompress = function(data)
+            {
+                var holder = URICompressor.decompress(data);
+                console.log(holder);
+                return holder;
+            }
         </script>
 
         <script>
