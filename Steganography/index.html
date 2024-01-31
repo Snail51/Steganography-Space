@@ -6,52 +6,68 @@
         <link rel="icon" href="./Resources/js_icon.jpg" type="jpg">
     </head>
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
-        <pre></pre>
-        <hr>
-        <div style="display: flex;">
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Encoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;;">Select Steganographic Medium:</p>
-                    <input type="file" id="encode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <p style="display: block; width: 95%;">Type all space characters you wish to use:</p>
-                    <textarea id="encode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateEncodeDepth()"></textarea>
-                    <i id="encode_bitdepth" style="display: block; width: 95%; resize: none;">Encoder will use bit depth of 0</i>
-                    <p style="display: block; width: 95%;">Type the message you wish to encode:</p>
-                    <textarea id="encode_message" style="width: 95%; resize: none; white-space: pre;"></textarea>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('ENCODE_READ')" style="font-size: 24px; display: block;">Encode</button>
-                </form>
-            </div>
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Decoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;">Select Text with Steganographic Data:</p>
-                    <input type="file" id="decode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <textarea id="decode_spaces" maxlength="36" style="width: 95%; resize: none; white-space: pre;" oninput="window.main.updateDecodeDepth()"></textarea>
-                    <i id="decode_bitdepth" style="display: block; width: 95%;">Decoder will use bit depth of 0</i>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('DECODE_READ')" style="font-size: 24px; display: block;">Decode</button>
-                </form>
-            </div>
+        
+        <input type="file" id="source">
+        <div>
+            <button onclick="window.functions[0]()">Single Bytes</button>
+            <button onclick="window.functions[1]()">Single Text</button>
+            <button onclick="window.functions[2]()">Multiple Bytes</button>
+            <button onclick="window.functions[3]()">MultipleText</button>
         </div>
-        
-        
-        <hr>
-        <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(RESULT WILL GO HERE UPON EXECUTION)</pre>
-        
+        <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
+        <button id="continue" onclick="proceed()" disabled="true">Execute</button>
+
         <script type="module">
-            import { Steganography } from "./Code/src/steganospace.js";
-            var Main = new Steganography();
+            import { Reader } from "./Code/src/reader.js";
+            var Main = new Reader("source");
             window.main = Main;
+            window.functions = new Array();
+
+            window.functions.push(async function()
+            {
+                var obj = await window.main.readSingleAsBytes();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+            window.functions.push(async function()
+            {
+                var obj = await window.main.readSingleAsText();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+            window.functions.push(async function()
+            {
+                var obj = await window.main.readMultipleAsBytes();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+            window.functions.push(async function()
+            {
+                var obj = await window.main.readMultipleAsText();
+                console.log(obj);
+                document.getElementById("display").innerHTML = JSON.stringify(obj);
+            });
+
+            setInterval(function(){
+                if(window.main.done == true && document.getElementById("source").files.length > 0)
+                {
+                    document.getElementById("continue").disabled = false;
+                }
+                else
+                {
+                    document.getElementById("continue").disabled = true;
+                }
+            }, 1000)
         </script>
 
         <script>
             function navigateRoot()
             {
                 window.location.href = "./index.html";
+            }
+            function proceed()
+            {
+                alert("program execution would now countine");
             }
         </script>
 

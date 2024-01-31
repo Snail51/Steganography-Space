@@ -1,0 +1,1 @@
+hexdump -C --no-squeezing ./img.jpg
