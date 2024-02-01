@@ -1,5 +1,5 @@
 //This class converts between Base64 and Base11 via BigInts and Binary Strings
-export class x64x11
+export class x2x11
 {
     constructor()
     {
@@ -12,12 +12,11 @@ export class x64x11
      * @param base11str - The parameter `base11str` is a string representing a number in base 11.
      * @returns a safe base64 representation of the input base11 string.
      */
-    static to64(base11str)
+    static to2(base11str)
     {
-        var baseten = x64x11.baseToBigInt(base11str, 11);
-        var base64 = x64x11.bigTenToBase(baseten, 64);
-        var safe =  x64x11.safe64(base64);
-        return safe;
+        var baseten = x2x11.baseToBigInt(base11str, 11);
+        var base2 = x2x11.bigTenToBase(baseten, 2);
+        return base2;
     }
 
     /**
@@ -26,43 +25,18 @@ export class x64x11
      * base64 format that has been made URI-safe.
      * @returns a string representation of the input base64 string converted to base11.
      */
-    static to11(base64str)
+    static to11(base2str)
     {
-        var unsafe = x64x11.unsafe64(base64str);
-        var baseten = x64x11.baseToBigInt(unsafe, 64);
-        var base11 = x64x11.bigTenToBase(baseten, 11);
+        var baseten = x2x11.baseToBigInt(base2str, 2);
+        var base11 = x2x11.bigTenToBase(baseten, 11);
         return base11;
-    }
-
-    /**
-     * The function `safe64` converts a base64 string with URL-safe characters to a regular base64
-     * string.
-     * @param unsafe64str - The parameter `unsafe64str` is a string that represents a base64 encoded
-     * value that may contain characters that are not safe for use in URLs.
-     * @returns the modified string after replacing all occurrences of "-" with "+" and "_" with "/".
-     */
-    static safe64(unsafe64str)
-    {
-        return unsafe64str.replace(/\-/g, '+').replace(/\_/g, '/');
-    }
-
-    /**
-     * The function unsafe64 converts a safe base64 string to an unsafe base64 string by replacing '+'
-     * with '-' and '/' with '_'.
-     * @param safe64str - The parameter safe64str is a string that represents a base64 encoded value.
-     * @returns a modified version of the input string `safe64str`. The function replaces all
-     * occurrences of the `+` character with `-` and all occurrences of the `/` character with `_`.
-     */
-    static unsafe64(safe64str)
-    {
-        return safe64str.replace(/\+/g, '-').replace(/\//g, '_');
     }
 
     static baseToBigInt(numberString, base)
     {
         let result = BigInt(0);
         for (let i = 0; i < numberString.length; i++) {
-            let digit = BigInt(x64x11.parseBase(numberString[i], base));
+            let digit = BigInt(x2x11.parseBase(numberString[i], base));
             result += digit * BigInt(base) ** BigInt(numberString.length - i - 1);
         }
         return result;
@@ -86,11 +60,6 @@ export class x64x11
         {
             return Number.parseInt(char, base);
         }
-        if(base <= 64) //using base64 encoding
-        {
-            const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-            return base64Chars.indexOf(char);
-        }
         console.warn("parseBase failed with char \"" + char + "\" and base " + base);
         return null;
     }
@@ -111,19 +80,9 @@ export class x64x11
         {
             return num.toString(base);
         }
-        if(base <= 64) //using base64 encoding
-        {
-            var order = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-            var str = "";
-            while (num)
-            {
-                var r = num % BigInt(base);
-                num = num / BigInt(base);
-                str = order.charAt(Number(r)) + str;
-            }
-            return str;
-        }
         console.warn("bigTenToBase failed with num \"" + num + "\" and base " + base);
         return null;
     }
+
+
 }

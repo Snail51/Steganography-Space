@@ -9,39 +9,39 @@
         
         <div>
             <p>Base 11</p>
-            <textarea id="11" oninput="window.sixtyfour()"></textarea>
+            <textarea id="11" oninput="window.two()"></textarea>
         </div>
         <div>
-            <p>Base 64</p>
-            <textarea id="64" oninput="window.eleven()"></textarea>
+            <p>Base 2</p>
+            <textarea id="2" oninput="window.eleven()"></textarea>
         </div>
         
 
         <script type="module">
-            import { x64x11 } from "./Code/src/base64-base11.js";
-            console.log("inputing base64 \"helloWorld\"...");
-            var base64 = "helloWorld";
-            var result = x64x11.to11(base64);
-            console.log("base11 output was \"" + result + "\", converting back to 64...");
+            import { x2x11 } from "./Code/src/base2-base11.js";
+            console.log("inputing base2 \"01010101\"...");
+            var base2 = "01010101";
+            var result = x2x11.to11(base2);
+            console.log("base11 output was \"" + result + "\", converting back to 2...");
             var base11 = result;
-            var result = x64x11.to64(base11);
-            console.log("reconvert resuled in base64 \"" + result + "\"...");
+            var result = x2x11.to2(base11);
+            console.log("reconvert resuled in base2 \"" + result + "\"...");
 
-            console.log("inputing base64 \"3545865a3\"...");
+            console.log("inputing base11 \"3545865a3\"...");
             var base11 = "3545865a3";
-            var result = x64x11.to64(base11);
-            console.log("base64 output was \"" + result + "\", converting back to 11...");
-            var base64 = result;
-            var result = x64x11.to11(base64);
+            var result = x2x11.to2(base11);
+            console.log("base2 output was \"" + result + "\", converting back to 11...");
+            var base2 = result;
+            var result = x2x11.to11(base2);
             console.log("reconvert resuled in base11 \"" + result + "\"...");
 
-            window.sixtyfour = function tosixtyfour()
+            window.two = function()
             {
-                document.getElementById("64").value = x64x11.to64(document.getElementById("11").value);
+                document.getElementById("2").value = x2x11.to2(document.getElementById("11").value);
             }
-            window.eleven = function toeleven()
+            window.eleven = function()
             {
-                document.getElementById("11").value = x64x11.to11(document.getElementById("64").value);
+                document.getElementById("11").value = x2x11.to11(document.getElementById("2").value);
             }
         </script>
 
