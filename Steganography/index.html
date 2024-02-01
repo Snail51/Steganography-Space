@@ -12,6 +12,7 @@
             <button onclick="window.functions[0]()">Single Bytes</button>
             <button onclick="window.functions[1]()">Single Text</button>
             <button onclick="window.functions[2]()">Single Binary</button>
+            <button onclick="window.functions[6]()">Single Binary Compress</button>
             <button onclick="window.functions[3]()">Multiple Bytes</button>
             <button onclick="window.functions[4]()">Multiple Text</button>
             <button onclick="window.functions[5]()">Multiple Binary</button>
@@ -21,6 +22,7 @@
 
         <script type="module">
             import { Reader } from "./Code/src/reader.js";
+            import { URICompressor } from "./Code/src/compression.js";
             var Main = new Reader("source");
             window.main = Main;
             window.functions = new Array();
@@ -61,6 +63,24 @@
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
             });
+            window.functions.push(async function() //compress
+            {
+                var data = window.function[2]();
+                var holder = URICompressor.compress(data.data);
+                data.data = holder;
+                console.log(data);
+                document.getElementById("display").innerHTML = JSON.stringify(data);
+                return data;
+            });
+            window.functions.push(async function() //decompress
+            {
+                var data = window.function[2]();
+                var holder = URICompressor.decompress(data.data);
+                data.data = holder;
+                console.log(data);
+                document.getElementById("display").innerHTML = JSON.stringify(data);
+                return data;
+            });
 
             setInterval(function(){
                 if(window.main.done == true && document.getElementById("source").files.length > 0)
@@ -71,7 +91,7 @@
                 {
                     document.getElementById("continue").disabled = true;
                 }
-            }, 1000)
+            }, 1000);
         </script>
 
         <script>
