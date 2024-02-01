@@ -41,20 +41,21 @@ export class Base11Sub
     encode(message, cover)
     {
         if ( !this.#validate_cover(cover, message.length) ) {
+            console.warn("ERROR: message length exceeds allowed cover size!");
             throw new CoverLimitError();
         }
         var result = cover;
-        var idx = cover.indexOf(' ');
-
+        let cover_idx = cover.indexOf(' ');
         for (const c in message) {
-            let target_space_idx = Number.parseInt(c, 11);
             try {
+                let target_space_idx = Number.parseInt(c, 11); 
                 let chr = this.spaces[target_space_idx];
-                result = result.substring(0,idx) + chr + result.substring(idx+1);
+                result = result.substring(0,cover_idx) + chr + result.substring(cover_idx+1);
             } catch (error) {
-                throw error;
+                throw "ERROR: Couldn't parse '" + c + "' to base 11.";
             }
-            idx = cover.indexOf(' ',idx+1);
+            // Set to index of next space
+            cover_idx = cover.indexOf(' ',idx+1);
         }
         return result;
     }
