@@ -32,40 +32,47 @@
                 var obj = await window.main.readSingleAsBytes();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function()
             {
                 var obj = await window.main.readSingleAsText();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function()
             {
                 var obj = await window.main.readSingleAsBinary();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function()
             {
                 var obj = await window.main.readMultipleAsBytes();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function()
             {
                 var obj = await window.main.readMultipleAsText();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function()
             {
                 var obj = await window.main.readMultipleAsBinary();
                 console.log(obj);
                 document.getElementById("display").innerHTML = JSON.stringify(obj);
+                return obj;
             });
             window.functions.push(async function() //compress
             {
-                var data = window.function[2]();
+                var data = await window.functions[2]();
+                console.log(data);
                 var holder = URICompressor.compress(data.data);
                 data.data = holder;
                 console.log(data);
@@ -74,7 +81,8 @@
             });
             window.functions.push(async function() //decompress
             {
-                var data = window.function[2]();
+                var data = await window.functions[2]();
+                console.log(data);
                 var holder = URICompressor.decompress(data.data);
                 data.data = holder;
                 console.log(data);
