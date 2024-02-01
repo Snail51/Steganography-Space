@@ -48,9 +48,12 @@ export class Base11Sub
 
         for (const c in message) {
             let target_space_idx = Number.parseInt(c, 11);
-            let chr = this.spaces[target_space_idx];
-
-            result = result.substring(0,idx) + chr + result.substring(idx+1);
+            try {
+                let chr = this.spaces[target_space_idx];
+                result = result.substring(0,idx) + chr + result.substring(idx+1);
+            } catch (error) {
+                throw error;
+            }
             idx = cover.indexOf(' ',idx+1);
         }
         return result;
