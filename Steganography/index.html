@@ -8,40 +8,39 @@
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
         
         <div>
-            <p>Base 11</p>
-            <textarea id="11" oninput="window.sixtyfour()"></textarea>
+            <h1>Encoder</h1>
+            <p>Cover</p>
+            <textarea id="cover"></textarea>
+            <p>Message</p>
+            <textarea id="message"></textarea>
+            <button onclick="window.encode()">Execute</button>
+            <p>Result</p>
+            <p id="encode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
         </div>
+        <hr>
         <div>
-            <p>Base 64</p>
-            <textarea id="64" oninput="window.eleven()"></textarea>
+            <h1>Decoder</h1>
+            <p>Ciphertext</p>
+            <textarea id="ciphertext"></textarea>
+            <button onclick="window.decode()">Execute</button>
+            <p>Result</p>
+            <p id="decode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
         </div>
         
 
         <script type="module">
-            import { x64x11 } from "./Code/src/base64-base11.js";
-            console.log("inputing base64 \"helloWorld\"...");
-            var base64 = "helloWorld";
-            var result = x64x11.to11(base64);
-            console.log("base11 output was \"" + result + "\", converting back to 64...");
-            var base11 = result;
-            var result = x64x11.to64(base11);
-            console.log("reconvert resuled in base64 \"" + result + "\"...");
+            import { Base8Sub } from "./Code/src/base8-substituter.js";
+            window.main = new Base8Sub();
 
-            console.log("inputing base64 \"3545865a3\"...");
-            var base11 = "3545865a3";
-            var result = x64x11.to64(base11);
-            console.log("base64 output was \"" + result + "\", converting back to 11...");
-            var base64 = result;
-            var result = x64x11.to11(base64);
-            console.log("reconvert resuled in base11 \"" + result + "\"...");
-
-            window.sixtyfour = function tosixtyfour()
+            window.encode = function()
             {
-                document.getElementById("64").value = x64x11.to64(document.getElementById("11").value);
+                var result = window.main.encode(document.getElementById("message").value, document.getElementById("cover").value);
+                document.getElementById("encode_result").innerHTML = result;
             }
-            window.eleven = function toeleven()
+            window.decode = function()
             {
-                document.getElementById("11").value = x64x11.to11(document.getElementById("64").value);
+                var result = window.main.decode(document.getElementById("ciphertext").value);
+                document.getElementById("decode_result").innerHTML = result;
             }
         </script>
 
