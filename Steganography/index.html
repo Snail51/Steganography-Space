@@ -26,14 +26,47 @@
             <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
         </div>
 
+        <div>
+            <h1>Encoder</h1>
+            <p>Cover</p>
+            <textarea id="cover"></textarea>
+            <p>Message</p>
+            <textarea id="message"></textarea>
+            <button onclick="window.encode()">Execute</button>
+            <p>Result</p>
+            <p id="encode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
+        </div>
+        <hr>
+        <div>
+            <h1>Decoder</h1>
+            <p>Ciphertext</p>
+            <textarea id="ciphertext"></textarea>
+            <button onclick="window.decode()">Execute</button>
+            <p>Result</p>
+            <p id="decode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
+        </div>
+
         <script type="module">
             import { Reader } from "./Code/src/reader.js";
             import { URICompressor } from "./Code/src/compression.js";
             import { x2x8 } from "./Code/src/base2-base8.js";
             import { Provider } from "./Code/src/provider.js";
+            import { Base8Sub } from "./Code/src/base8-substituter.js";
             window.reader = new Reader("source");
             window.downloader = new Provider("download");
             window.converter = new x2x8();
+            window.substitutor = new Base8Sub();
+
+            window.encode = function()
+            {
+                var result = window.substitutor.encode(document.getElementById("message").value, document.getElementById("cover").value);
+                document.getElementById("encode_result").innerHTML = result;
+            }
+            window.decode = function()
+            {
+                var result = window.substitutor.decode(document.getElementById("ciphertext").value);
+                document.getElementById("decode_result").innerHTML = result;
+            }
 
             window.read = async function()
             {
@@ -88,6 +121,6 @@
         </script>
 
         <hr>
-        <i style="color: whitesmoke;">This tool was developed by Brendan Rood in the spring of 2024</i>
+        <i style="color: whitesmoke;">This tool was developed by Brendan Rood, Jet Li, and Connor Hagen in the spring of 2024</i>
     </body>
 </html>
