@@ -10,13 +10,13 @@
         <div>
             <p>Reader</p>
             <input type="file" id="source">
-            <button onclick="window.read()">Read</button>
+            <button onclick="window.main.read()">Read</button>
         </div>
         <hr>
         <div>
             <p>Downloader</p>
             <a id="download" style="color: cyan;">Download will go here</a>
-            <button onclick="window.download()">Download</button>
+            <button onclick="window.main.download()">Download</button>
         </div>
         <hr>
         <div>
@@ -32,7 +32,7 @@
             <textarea id="cover"></textarea>
             <p>Message</p>
             <textarea id="message"></textarea>
-            <button onclick="window.encode()">Execute</button>
+            <button onclick="window.main.encode()">Execute</button>
             <p>Result</p>
             <p id="encode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
         </div>
@@ -41,72 +41,14 @@
             <h1>Decoder</h1>
             <p>Ciphertext</p>
             <textarea id="ciphertext"></textarea>
-            <button onclick="window.decode()">Execute</button>
+            <button onclick="window.main.decode()">Execute</button>
             <p>Result</p>
             <p id="decode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
         </div>
 
         <script type="module">
-            import { Reader } from "./Code/src/reader.js";
-            import { URICompressor } from "./Code/src/compression.js";
-            import { x2x8 } from "./Code/src/base2-base8.js";
-            import { Provider } from "./Code/src/provider.js";
-            import { Base8Sub } from "./Code/src/base8-substituter.js";
-            window.reader = new Reader("source");
-            window.downloader = new Provider("download");
-            window.converter = new x2x8();
-            window.substitutor = new Base8Sub();
-
-            window.encode = function()
-            {
-                var result = window.substitutor.encode(document.getElementById("message").value, document.getElementById("cover").value);
-                document.getElementById("encode_result").innerHTML = result;
-            }
-            window.decode = function()
-            {
-                var result = window.substitutor.decode(document.getElementById("ciphertext").value);
-                document.getElementById("decode_result").innerHTML = result;
-            }
-
-            window.read = async function()
-            {
-                //read the file as binary from the reader
-                var file = await window.reader.readSingleAsBinary();
-                var size1 = Math.floor(file.data.length/8);
-
-                //compress the binary (also to binary)
-                file.data = URICompressor.compress(file.data);
-                var size2 = Math.floor(file.data.length/8);
-                console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
-                
-                //convert from binary (base 2) to octal (base8)
-                file.data = window.converter.to8(file.data);
-                document.getElementById("display").innerHTML = JSON.stringify(file);
-                window.payload = file;
-            }
-
-            window.download = async function()
-            {
-                //collect the compressed binary data from the window's payload
-                var file = window.payload;
-                
-                //convert from octal (base 8) to binary (base 2)
-                file.data = window.converter.to2(file.data);
-
-                //decompress the binary (also to binary)
-                file.data = URICompressor.decompress(file.data);
-
-                document.getElementById("display").innerHTML = "";
-
-                window.downloader.clear();
-                var name = file.name;
-                var type = file.type;
-                var data = URICompressor.BinaryToU8(file.data);
-                window.downloader.provide(name, type, data);
-            }
-            setInterval(function(){
-                document.getElementById("progress").innerHTML = "Progress: " + String(window.converter.progress).substring(2,4) + "%";
-            },1000);
+            import { Steganospace } from "./Code/src/steganospace.js";
+            window.main = new Steganospace();
         </script>
 
         <script>
