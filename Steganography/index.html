@@ -45,6 +45,13 @@
             window.main = Main;
         </script>
 
+
+        <script type="module">
+            import {Compressor} from "./Code/src/steganospace.js";
+            var compressionBoy = new Compressor();
+            window.main = compressionBoy;
+        </script>
+
         <script>
             function navigateRoot()
             {
