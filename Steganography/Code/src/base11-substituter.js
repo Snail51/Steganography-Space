@@ -1,7 +1,7 @@
 class CoverLimitError extends Error {
     constructor(message) {
         this.message = (message === undefined) ? 
-            "ERROR: Cover spaces have been exhausted!" : message;
+            "ERROR: Insufficient cover limit!" : message;
         this.name = "CoverLimitError";
     }
 }
@@ -9,11 +9,14 @@ class CoverLimitError extends Error {
 //This class replaces space characters with variants in a text following a Base11 encoding scheme
 export class Base11Sub
 {
+    #base11_chars = "0123456789A";
     constructor()
     {
         //decide what spaces will be used
-        this.spaces = undefined;
+        this.spaces = "";
         this.spaceType = "BILLIARDS"; //SPACE, BILLIARDS
+
+
         switch(this.spaceType)
         {
             case "SPACE":
@@ -45,17 +48,16 @@ export class Base11Sub
             throw new CoverLimitError();
         }
         var result = cover;
-        let cover_idx = cover.indexOf(' ');
-        for (const c in message) {
-            try {
-                let target_space_idx = Number.parseInt(c, 11); 
-                let chr = this.spaces[target_space_idx];
-                result = result.substring(0,cover_idx) + chr + result.substring(cover_idx+1);
-            } catch (error) {
-                throw "ERROR: Couldn't parse '" + c + "' to base 11.";
+        var cover_i = cover.indexOf(' ');
+        for (var c of message) {
+            let target_space_idx = parseInt(c.toString()); 
+            if (target_space_idx === NaN) {
+                continue;
             }
+            let chr = this.spaces.at(target_space_idx);
+            result = result.substring(0,cover_i) + chr + result.substring(cover_i+1);
             // Set to index of next space
-            cover_idx = cover.indexOf(' ',idx+1);
+            cover_i = cover.indexOf(' ',cover_i+1);
         }
         return result;
     }
@@ -63,22 +65,33 @@ export class Base11Sub
     /**
      * The "decode" identifies all this.spaces characters in the provided string and
      * reconstitutes a Base11 value (as string)
-     * @param string - The string with substituted space characters from this.spaces
+     * @param encoded_msg - The string with substituted space characters from this.spaces
      * @return - Returns a Base11 value (as string) capturing the this.spaces information
      * @note - Trailing nulls are discarded
      */
-    decode(string)
+    decode(encoded_msg)
     {
-        var t1 = string.filter((value) => this.spaces.indexOf(value) !== -1);
-        // something else
+        const expr = /[this.spaces]/g;
+        var spaces = encoded_msg.matchAll(expr);
+        if (!spaces || spaces.length === 0) {
+            throw "ERROR: No valid encoding characters in string!";
+        }
+        var result = "";
+        for (let space in spaces) {
+            let position = this.spaces.indexOf(space);
+            let chr = this.#base11_chars.at(position);
+
+            result += chr;
+        }
+        return result;
     }
 
     /**
      * Compares a cover and the length of a message (which is being encoded by this.encode())
-     * and first checks if the cover message is shorter than the message (return false);
+     * by first checking if the cover message is shorter than the message (return false);
      * else, counts the number of spaces in this message and returns whether or not it is >= message_len
-     * @param message - The Base11 value (as string) that is to be encoded into the cover.
-     * @param message_len - The (integer) size of
+     * @param cover - The cover string.
+     * @param message_len - The (integer) size of the message.
      * @return - Returns true if this is a valid cover given the length of the message, else false.
      */
     #validate_cover(cover, message_len) {
