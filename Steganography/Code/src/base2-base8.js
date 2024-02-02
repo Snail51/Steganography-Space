@@ -8,69 +8,45 @@ export class x2x8
 
     static to2(base8str)
     {
-        var baseten = x2x8.baseToBigInt(base8str, 8);
-        var base2 = x2x8.bigTenToBase(baseten, 2);
+        var base2 = "";
+        //var debug = 0;
+        for(var char of base8str)
+        {
+            var ten = Number.parseInt(char, 8);
+            var binary = ten.toString(2);
+            binary = binary.padStart(3, "0");
+            //console.log(char, binary);
+            base2 += binary;
+            //console.log("to2 " + debug/base8str.length);
+            //debug++;
+        }
+        let regex = /^0*1/;
+        base2 = base2.replace(regex, "");
         return base2;
     }
 
     static to8(base2str)
     {
-        var baseten = x2x8.baseToBigInt(base2str, 2);
-        var base8 = x2x8.bigTenToBase(baseten, 8);
-        return base8;
-    }
-
-    static baseToBigInt(numberString, base)
-    {
-        let result = BigInt(0);
-        for (let i = 0; i < numberString.length; i++) {
-            let digit = BigInt(x2x8.parseBase(numberString[i], base));
-            result += digit * BigInt(base) ** BigInt(numberString.length - i - 1);
-        }
-        return result;
-    }
-
-    /**
-     * The function `parseBase` takes a character and a base as input and returns the parsed value of
-     * the character based on the given base in base 10.
-     * @param char - The character that needs to be parsed.
-     * @param base - The base parameter represents the numerical base in which the character should be
-     * parsed. It determines the range of valid digits for the character. If the base <= 36, standard
-     * Number.parse() is used. If > 36, base64 encoding is used.
-     * @returns The function `parseBase` returns the parsed value of the character `char` in the
-     * specified `base`. If the `base` is less than or equal to 36, it uses `Number.parseInt` to parse
-     * the character. If the `base` is between 37 and 64 (inclusive), it uses base64 encoding to parse
-     * the character.
-     */
-    static parseBase(char, base)
-    {
-        if(base <= 36) //handle normally
+        var padcount = 3 - (base2str.length % 3);
+        var padding = "0".repeat(padcount - 1) + "1"; //make sure to bad with 00000001 so we can find the end of the padding (like XYYY)
+        var padded = padding + base2str;
+        var base2arr = x2x8.splitIntoSizedSubstrings(padded, 3);
+        var octal = "";
+        //var debug = 0;
+        for(var octet of base2arr)
         {
-            return Number.parseInt(char, base);
+            var ten = Number.parseInt(octet, 2);
+            octal += ten.toString(8);
+            //console.log("to8 " + debug/base2arr.length);
+            //debug++;
         }
-        console.warn("parseBase failed with char \"" + char + "\" and base " + base);
-        return null;
+        return octal;
     }
 
-    /**
-     * The function `bigTenToBase` converts a given BigInt from base 10 to a specified base, handling
-     * bases <= 36 with standard number.toString() encoding and  bases 37-64 (inclusive) with 
-     * base64 encoding.
-     * @param num - The BigInt that you want to convert to a different base.
-     * @param base - The "base" parameter represents the base to which the number should be converted.
-     * It can be any integer value 2-64.
-     * @returns The function `bigTenToBase` returns the converted number as a string in the specified
-     * base.
-     */
-    static bigTenToBase(num, base) 
+    static splitIntoSizedSubstrings(str, size)
     {
-        if(base <= 36) //handle normally
-        {
-            return num.toString(base);
-        }
-        console.warn("bigTenToBase failed with num \"" + num + "\" and base " + base);
-        return null;
+        let regex = new RegExp(".{1," + size + "}", "g");
+        let substrings = str.match(regex);
+        return substrings;
     }
-
-
 }

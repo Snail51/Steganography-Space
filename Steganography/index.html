@@ -7,54 +7,67 @@
     </head>
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
         
-        <input type="file" id="source">
         <div>
-            <button onclick="window.functions[0]()">Single Bytes</button>
+            <p>Reader</p>
+            <input type="file" id="source">
+            <button onclick="window.read()">Read</button>
         </div>
-        <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
-        <button id="continue" onclick="proceed()" disabled="true">Execute</button>
+        <hr>
+        <div>
+            <p>Downloader</p>
+            <a id="download" style="color: cyan;">Download will go here</a>
+            <button onclick="window.download()">Download</button>
+        </div>
+        <hr>
+        <div>
+            <p>Sample</p>
+            <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
+        </div>
 
         <script type="module">
             import { Reader } from "./Code/src/reader.js";
             import { URICompressor } from "./Code/src/compression.js";
             import { x2x8 } from "./Code/src/base2-base8.js";
-            var Main = new Reader("source");
-            window.main = Main;
-            window.functions = new Array();
+            import { Provider } from "./Code/src/provider.js";
+            window.reader = new Reader("source");
+            window.downloader = new Provider("download");
 
-            window.functions.push(async function() //compress
+            window.read = async function()
             {
-                var file = await window.main.readSingleAsBinary();
+                //read the file as binary from the reader
+                var file = await window.reader.readSingleAsBinary();
                 var size1 = Math.floor(file.data.length/8);
+
+                //compress the binary (also to binary)
                 file.data = URICompressor.compress(file.data);
                 var size2 = Math.floor(file.data.length/8);
                 console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
+                
+                //convert from binary (base 2) to octal (base8)
                 file.data = x2x8.to8(file.data);
                 document.getElementById("display").innerHTML = JSON.stringify(file);
-                return file;
-            });
-            window.functions.push(async function() //decompress
-            {
-                var data = await window.functions[2]();
-                console.log(data.name);
-                console.log(Math.floor(data.data.length / 8));
-                var holder = URICompressor.decompress(data.data);
-                data.data = holder;
-                console.log(Math.floor(data.data.length / 8));
-                document.getElementById("display").innerHTML = JSON.stringify(data);
-                return data;
-            });
+                window.payload = file;
+            }
 
-            setInterval(function(){
-                if(window.main.done == true && document.getElementById("source").files.length > 0)
-                {
-                    document.getElementById("continue").disabled = false;
-                }
-                else
-                {
-                    document.getElementById("continue").disabled = true;
-                }
-            }, 1000);
+            window.download = async function()
+            {
+                //collect the compressed binary data from the window's payload
+                var file = window.payload;
+                
+                //convert from octal (base 8) to binary (base 2)
+                file.data = x2x8.to2(file.data);
+
+                //decompress the binary (also to binary)
+                file.data = URICompressor.decompress(file.data);
+
+                document.getElementById("display").innerHTML = "";
+
+                window.downloader.clear();
+                var name = file.name;
+                var type = file.type;
+                var data = URICompressor.BinaryToU8(file.data);
+                window.downloader.provide(name, type, data);
+            }
         </script>
 
         <script>
