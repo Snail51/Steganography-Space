@@ -6,44 +6,31 @@
         <link rel="icon" href="./Resources/js_icon.jpg" type="jpg">
     </head>
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
-        
-        <div>
-            <p>Reader</p>
-            <input type="file" id="source">
-            <button onclick="window.main.read()">Read</button>
-        </div>
-        <hr>
-        <div>
-            <p>Downloader</p>
-            <a id="download" style="color: cyan;">Download will go here</a>
-            <button onclick="window.main.download()">Download</button>
-        </div>
-        <hr>
-        <div>
-            <p>Progress</p>
-            <p id="progress"></p>
-            <p>Sample</p>
-            <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
-        </div>
-
-        <div>
-            <h1>Encoder</h1>
-            <p>Cover</p>
-            <textarea id="cover"></textarea>
-            <p>Message</p>
-            <textarea id="message"></textarea>
-            <button onclick="window.main.encode()">Execute</button>
-            <p>Result</p>
-            <p id="encode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
-        </div>
-        <hr>
-        <div>
-            <h1>Decoder</h1>
-            <p>Ciphertext</p>
-            <textarea id="ciphertext"></textarea>
-            <button onclick="window.main.decode()">Execute</button>
-            <p>Result</p>
-            <p id="decode_result" style="max-width: 95vw; word-wrap: break-word;"></p>
+        <div style="display: flex; height: 80vh;">
+            <div style="flex: 1; height: 80vh;">
+                <h1>Encoder</h1>
+                <div style="display: flex;">
+                    <div style="flex: 1;">
+                        <p>Message</p>
+                        <input type="file" id="message" single>
+                    </div>
+                    <div style="flex: 1;">
+                        <p>Cover</p>
+                        <input type="file" id="cover" single>
+                    </div>
+                </div>
+                <button id="encode_button" onclick="window.main.encode()">Encode</button>
+                <hr>
+                <a id="encode_download" style="color: cyan;">Result Will Go Here</a>
+            </div>
+            <div style="flex: 1; height: 80vh;">
+                <h1>Decoder</h1>
+                <p>Ciphertext</p>
+                <input type="file" id="ciphertext" single>
+                <button id="decode_button" onclick="window.main.decode()">Decode</button>
+                <hr>
+                <a id="decode_download" style="color: cyan;">Result Will Go Here</a>
+            </div>
         </div>
 
         <script type="module">

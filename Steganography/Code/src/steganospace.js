@@ -8,59 +8,85 @@ export class Steganospace
 {
     constructor()
     {
-        this.reader = new Reader("source");
-        this.downloader = new Provider("download");
+        this.messageReader = new Reader("message");
+        this.coverReader = new Reader("cover");
+        this.decodeReader = new Reader("ciphertext");
+        this.encodeDownload = new Provider("encode_download");
+        this.decodeDownload = new Provider("decode_download");
         this.converter = new x2x8();
         this.substitutor = new Base8Sub();
 
-        setInterval(function(){
-            document.getElementById("progress").innerHTML = "Progress: " + String(this.converter.progress).substring(2,4) + "%";
-        }.bind(this),1000);
+        //setInterval(function(){
+        //    document.getElementById("progress").innerHTML = "Progress: " + String(this.converter.progress).substring(2,4) + "%";
+        //}.bind(this),1000);
     }
-    encode()
+    async encode()
     {
-        var result = this.substitutor.encode(document.getElementById("message").value, document.getElementById("cover").value);
-        document.getElementById("encode_result").innerHTML = result;
-    }
-    decode()
-    {
-        var result = this.substitutor.decode(document.getElementById("ciphertext").value);
-        document.getElementById("decode_result").innerHTML = result;
-    }
-    async read()
-    {
-        //read the file as binary from the reader
-        var file = await this.reader.readSingleAsBinary();
-        var size1 = Math.floor(file.data.length/8);
+        //read the message file as binary from the reader
+        var message = await this.messageReader.readSingleAsBinary();
+        var size1 = Math.floor(message.data.length/8);
 
         //compress the binary (also to binary)
-        file.data = URICompressor.compress(file.data);
-        var size2 = Math.floor(file.data.length/8);
+        message.data = URICompressor.compress(message.data);
+        var size2 = Math.floor(message.data.length/8);
         console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
         
         //convert from binary (base 2) to octal (base8)
-        file.data = this.converter.to8(file.data);
-        document.getElementById("display").innerHTML = JSON.stringify(file);
-        this.payload = file;
+        message.data = this.converter.to8(message.data);
+
+        //read the cover file as text from the reader
+        var cover = await this.coverReader.readSingleAsText();
+
+        //do the steganography
+        var result = this.substitutor.encode(message.data, cover.data);
+
+        //send the file to the webpage for downloading
+        this.encodeDownload.provide(cover.name, cover.type, result);
     }
-    download()
+    async decode()
     {
-        //collect the compressed binary data from the this's payload
-        var file = this.payload;
-                
-        //convert from octal (base 8) to binary (base 2)
-        file.data = this.converter.to2(file.data);
+        //read the ciphertext file as text
+        var decode = await this.decodeReader.readSingleAsText();
 
-        //decompress the binary (also to binary)
-        file.data = URICompressor.decompress(file.data);
+        //undo the steganography
+        decode.data = this.substitutor.decode(decode.data);
 
-        document.getElementById("display").innerHTML = "";
+        //convert from octal (base8) to binary (base 2)
+        decode.data = this.converter.to2(decode.data);
 
-        this.downloader.clear();
-        var name = file.name;
-        var type = file.type;
-        var data = URICompressor.BinaryToU8(file.data);
-        this.downloader.provide(name, type, data);
+        //decompress the binary data
+        decode.data = URICompressor.decompress(decode.data);
+        console.log(decode.data);
+
+        //pull out the metadata needeed to reconstitute itself
+        var namelen = decode.data.substring(decode.data.length - 32, decode.data.length - 16) //grab the bytes [-4:-2]
+        namelen = Number.parseInt(namelen, 2);
+        var typelen = decode.data.substring(decode.data.length - 16, decode.data.length - 0) //grab the bytes [-1:-0]
+        typelen = Number.parseInt(typelen, 2);
+        var name = decode.data.substring(decode.data.length - 32 - (typelen*8)  - (namelen*8), decode.data.length - 32 - (typelen*8));
+        name = binaryToString(name);
+        name = decodeURIComponent(name);
+        var type = decode.data.substring(decode.data.length - 32 - (typelen*8), decode.data.length - 32);
+        type = binaryToString(type);
+        type = decodeURIComponent(type);
+        decode.data = decode.data.substring(0, decode.data.length - 32 - (namelen*8) - (typelen*8));
+        decode.data = binaryToString(decode.data);
+        console.log(name, type, decode.data);
+
+        //send it the the window for download
+        this.decodeDownload.provide(name, type, decode.data);
+
+        function binaryToString(binary)
+        {
+            console.log(binary);
+            var str = "";
+            for(var i = 0; i < binary.length; i+=8)
+            {
+                var ten = Number.parseInt(binary.substring(i, i+8),2);
+                str += String.fromCodePoint(ten);
+            }
+            return str;
+        }
     }
 }
 

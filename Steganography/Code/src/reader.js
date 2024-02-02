@@ -19,10 +19,50 @@ export class Reader
         var file = this.collectMetadata(this.element.files[0]);
         file.data = await this.binaryRead(this.element.files[0]);
         console.log(file);
-        var metadata = "11111111" + "00000000" + Reader.stringToBinary(encodeURIComponent(file.name)) + "00000000" + Reader.stringToBinary(encodeURIComponent(file.type)) + "00000000" + Reader.stringToBinary(encodeURIComponent(file.size));
-        file.data = file.data + metadata;
+
+        //assemble name append
+        var name = stringToBinary(file.name);
+        var namelen = name.length / 8;
+        namelen = namelen.toString(2);
+        namelen = namelen.padStart(16, "0");
+        if(namelen.length > 16) //sanity check
+        {
+            console.warn("name was way too large???");
+            return null;
+        }
+
+        //assemble type append
+        var type = stringToBinary(file.type);
+        var typelen = type.length / 8;
+        typelen = typelen.toString(2);
+        typelen = typelen.padStart(16, "0");
+        if(typelen.length > 16) //sanity check
+        {
+            console.warn("name was way too large???");
+            return null;
+        }
+
+        //append the metadata
+        console.log(name, type, namelen, typelen);
+        file.data = file.data + name + type + namelen + typelen;
+
         this.done = true;
         return file;
+
+        function stringToBinary(string)
+        {
+            const encoder = new TextEncoder();
+            var holder = encodeURIComponent(string); //make sure it falls in the ASCII range
+            holder = encoder.encode(holder);
+            var binary = "";
+            for(var char of holder)
+            {
+                var b2 = char.toString(2);
+                b2 = b2.padStart(8, "0");
+                binary += b2;
+            }
+            return binary;
+        }
     }
 
     /**
