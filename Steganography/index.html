@@ -20,6 +20,8 @@
         </div>
         <hr>
         <div>
+            <p>Progress</p>
+            <p id="progress"></p>
             <p>Sample</p>
             <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
         </div>
@@ -31,6 +33,7 @@
             import { Provider } from "./Code/src/provider.js";
             window.reader = new Reader("source");
             window.downloader = new Provider("download");
+            window.converter = new x2x8();
 
             window.read = async function()
             {
@@ -44,7 +47,7 @@
                 console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
                 
                 //convert from binary (base 2) to octal (base8)
-                file.data = x2x8.to8(file.data);
+                file.data = window.converter.to8(file.data);
                 document.getElementById("display").innerHTML = JSON.stringify(file);
                 window.payload = file;
             }
@@ -55,7 +58,7 @@
                 var file = window.payload;
                 
                 //convert from octal (base 8) to binary (base 2)
-                file.data = x2x8.to2(file.data);
+                file.data = window.converter.to2(file.data);
 
                 //decompress the binary (also to binary)
                 file.data = URICompressor.decompress(file.data);
@@ -68,6 +71,9 @@
                 var data = URICompressor.BinaryToU8(file.data);
                 window.downloader.provide(name, type, data);
             }
+            setInterval(function(){
+                document.getElementById("progress").innerHTML = "Progress: " + String(window.converter.progress).substring(2,4) + "%";
+            },1000);
         </script>
 
         <script>

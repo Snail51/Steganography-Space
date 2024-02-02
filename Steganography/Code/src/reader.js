@@ -7,7 +7,7 @@ export class Reader
         this.data = "";
         this.done = false;
     }
-
+ 
     /**
      * The `readSingleAsBinary()` method is used to read the content of a single file linked
      * to this object as an array of bytes. It is typically used when dealing with binary files.
@@ -18,6 +18,9 @@ export class Reader
         this.done = false;
         var file = this.collectMetadata(this.element.files[0]);
         file.data = await this.binaryRead(this.element.files[0]);
+        console.log(file);
+        var metadata = "11111111" + "00000000" + Reader.stringToBinary(encodeURIComponent(file.name)) + "00000000" + Reader.stringToBinary(encodeURIComponent(file.type)) + "00000000" + Reader.stringToBinary(encodeURIComponent(file.size));
+        file.data = file.data + metadata;
         this.done = true;
         return file;
     }
@@ -215,5 +218,18 @@ export class Reader
             this.data = holder;
         });
         return this.data
+    }
+
+    static stringToBinary(input) 
+    {
+        var result = "";
+        for(var char of input)
+        {
+            var ten = char.charCodeAt(0);
+            var two = ten.toString(2);
+            two = two.padStart(8, "0");
+            result += two;
+        }
+        return result;
     }
 }
