@@ -10,12 +10,6 @@
         <input type="file" id="source">
         <div>
             <button onclick="window.functions[0]()">Single Bytes</button>
-            <button onclick="window.functions[1]()">Single Text</button>
-            <button onclick="window.functions[2]()">Single Binary</button>
-            <button onclick="window.functions[6]()">Single Binary Compress</button>
-            <button onclick="window.functions[3]()">Multiple Bytes</button>
-            <button onclick="window.functions[4]()">Multiple Text</button>
-            <button onclick="window.functions[5]()">Multiple Binary</button>
         </div>
         <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
         <button id="continue" onclick="proceed()" disabled="true">Execute</button>
@@ -27,65 +21,24 @@
             window.main = Main;
             window.functions = new Array();
 
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readSingleAsBytes();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readSingleAsText();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readSingleAsBinary();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readMultipleAsBytes();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readMultipleAsText();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
-            window.functions.push(async function()
-            {
-                var obj = await window.main.readMultipleAsBinary();
-                console.log(obj);
-                document.getElementById("display").innerHTML = JSON.stringify(obj);
-                return obj;
-            });
             window.functions.push(async function() //compress
             {
-                var data = await window.functions[2]();
-                console.log(data);
-                var holder = URICompressor.compress(data.data);
-                data.data = holder;
-                console.log(data);
-                document.getElementById("display").innerHTML = JSON.stringify(data);
-                return data;
+                var file = await window.main.readSingleAsBinary();
+                var size1 = Math.floor(file.data.length/8);
+                file.data = URICompressor.compress(file.data);
+                var size2 = Math.floor(file.data.length/8);
+                console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
+                document.getElementById("display").innerHTML = JSON.stringify(file);
+                return file;
             });
             window.functions.push(async function() //decompress
             {
                 var data = await window.functions[2]();
-                console.log(data);
+                console.log(data.name);
+                console.log(Math.floor(data.data.length / 8));
                 var holder = URICompressor.decompress(data.data);
                 data.data = holder;
-                console.log(data);
+                console.log(Math.floor(data.data.length / 8));
                 document.getElementById("display").innerHTML = JSON.stringify(data);
                 return data;
             });

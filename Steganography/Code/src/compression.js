@@ -42,6 +42,7 @@ export class URICompressor
             byte = byte.padStart(8, "0");
             result += byte;
         }
+        //console.log("ResultantBinary", result);
         return result;
     }
 
@@ -53,7 +54,9 @@ export class URICompressor
         {
             holder.push(Number.parseInt(byte, 2));
         }
-        return new Uint8Array(holder);
+        var result = new Uint8Array(holder);
+        //console.log("ResultantU8", result)
+        return result;
     }
 
     static splitIntoChunks(str, size) 
