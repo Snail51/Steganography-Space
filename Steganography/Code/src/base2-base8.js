@@ -1,42 +1,30 @@
 //This class converts between Base64 and Base11 via BigInts and Binary Strings
-export class x2x11
+export class x2x8
 {
     constructor()
     {
         //you shouldn't be instantiating this
     }
 
-    /**
-     * The function takes a base 11 string, converts it to base 10, then converts it to base 64 and
-     * returns a URI-safe version of the base 64 string.
-     * @param base11str - The parameter `base11str` is a string representing a number in base 11.
-     * @returns a safe base64 representation of the input base11 string.
-     */
-    static to2(base11str)
+    static to2(base8str)
     {
-        var baseten = x2x11.baseToBigInt(base11str, 11);
-        var base2 = x2x11.bigTenToBase(baseten, 2);
+        var baseten = x2x8.baseToBigInt(base8str, 8);
+        var base2 = x2x8.bigTenToBase(baseten, 2);
         return base2;
     }
 
-    /**
-     * The function `to11` converts a base64 string to a base11 string.
-     * @param base64str - The parameter `base64str` is a string that represents a number encoded in
-     * base64 format that has been made URI-safe.
-     * @returns a string representation of the input base64 string converted to base11.
-     */
-    static to11(base2str)
+    static to8(base2str)
     {
-        var baseten = x2x11.baseToBigInt(base2str, 2);
-        var base11 = x2x11.bigTenToBase(baseten, 11);
-        return base11;
+        var baseten = x2x8.baseToBigInt(base2str, 2);
+        var base8 = x2x8.bigTenToBase(baseten, 8);
+        return base8;
     }
 
     static baseToBigInt(numberString, base)
     {
         let result = BigInt(0);
         for (let i = 0; i < numberString.length; i++) {
-            let digit = BigInt(x2x11.parseBase(numberString[i], base));
+            let digit = BigInt(x2x8.parseBase(numberString[i], base));
             result += digit * BigInt(base) ** BigInt(numberString.length - i - 1);
         }
         return result;

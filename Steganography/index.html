@@ -17,6 +17,7 @@
         <script type="module">
             import { Reader } from "./Code/src/reader.js";
             import { URICompressor } from "./Code/src/compression.js";
+            import { x2x8 } from "./Code/src/base2-base8.js";
             var Main = new Reader("source");
             window.main = Main;
             window.functions = new Array();
@@ -28,6 +29,7 @@
                 file.data = URICompressor.compress(file.data);
                 var size2 = Math.floor(file.data.length/8);
                 console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
+                file.data = x2x8.to8(file.data);
                 document.getElementById("display").innerHTML = JSON.stringify(file);
                 return file;
             });
