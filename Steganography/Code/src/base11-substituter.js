@@ -72,12 +72,12 @@ export class Base11Sub
     decode(encoded_msg)
     {
         const expr = /[this.spaces]/g;
-        var spaces = encoded_msg.matchAll(expr);
-        if (!spaces || spaces.length === 0) {
+        var found_spaces = encoded_msg.matchAll(expr);
+        if (!found_spaces || found_spaces.length === 0) {
             throw "ERROR: No valid encoding characters in string!";
         }
         var result = "";
-        for (let space in spaces) {
+        for (let space of found_spaces) {
             let position = this.spaces.indexOf(space);
             let chr = this.#base11_chars.at(position);
 
