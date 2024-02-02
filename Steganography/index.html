@@ -6,50 +6,74 @@
         <link rel="icon" href="./Resources/js_icon.jpg" type="jpg">
     </head>
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
-        <pre></pre>
-        <hr>
-        <div style="display: flex;">
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Encoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;;">Select Steganographic Medium:</p>
-                    <input type="file" id="encode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <p style="display: block; width: 95%;">Select the message you wish to encode:</p>
-                    <input type="file" id="encode_message" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('ENCODE_READ_ONE')" style="font-size: 24px; display: block;">Encode</button>
-                </form>
-            </div>
-            <div style="width: 47.5vw; border: 5px solid black; background-color: grey; padding: 1%;">
-                <form>
-                    <h2>Decoder</h2>
-                    <hr>
-                    <p style="display: block; width: 95%;">Select Text with Steganographic Data:</p>
-                    <input type="file" id="decode_medium" single style="color: whitesmoke; font-size: 24px; display: block; max-width: 95%;"><br/>
-                    <pre></pre>
-                    <button type="button" onclick="window.main.execution('DECODE_READ')" style="font-size: 24px; display: block;">Decode</button>
-                </form>
-            </div>
+        
+        <div>
+            <p>Reader</p>
+            <input type="file" id="source">
+            <button onclick="window.read()">Read</button>
         </div>
-        
-        
         <hr>
-        <button onClick="copy()">Copy to Clipboard</button>
-        <pre id="progress" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto;">(PROGRESS)</pre>
-        <a id="download" style="white-space: pre-wrap; word-wrap: break-word; overflow-x: auto; color: cyan;">(DOWNLOAD LINK)</a>
+        <div>
+            <p>Downloader</p>
+            <a id="download" style="color: cyan;">Download will go here</a>
+            <button onclick="window.download()">Download</button>
+        </div>
+        <hr>
+        <div>
+            <p>Progress</p>
+            <p id="progress"></p>
+            <p>Sample</p>
+            <p id="display" style="word-break: break-word; max-width: 95vw;"></p>
+        </div>
 
         <script type="module">
-            import { Steganography } from "./Code/src/steganospace.js";
-            var Main = new Steganography();
-            window.main = Main;
-        </script>
+            import { Reader } from "./Code/src/reader.js";
+            import { URICompressor } from "./Code/src/compression.js";
+            import { x2x8 } from "./Code/src/base2-base8.js";
+            import { Provider } from "./Code/src/provider.js";
+            window.reader = new Reader("source");
+            window.downloader = new Provider("download");
+            window.converter = new x2x8();
 
+            window.read = async function()
+            {
+                //read the file as binary from the reader
+                var file = await window.reader.readSingleAsBinary();
+                var size1 = Math.floor(file.data.length/8);
 
-        <script type="module">
-            import {Compressor} from "./Code/src/steganospace.js";
-            var compressionBoy = new Compressor();
-            window.main = compressionBoy;
+                //compress the binary (also to binary)
+                file.data = URICompressor.compress(file.data);
+                var size2 = Math.floor(file.data.length/8);
+                console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
+                
+                //convert from binary (base 2) to octal (base8)
+                file.data = window.converter.to8(file.data);
+                document.getElementById("display").innerHTML = JSON.stringify(file);
+                window.payload = file;
+            }
+
+            window.download = async function()
+            {
+                //collect the compressed binary data from the window's payload
+                var file = window.payload;
+                
+                //convert from octal (base 8) to binary (base 2)
+                file.data = window.converter.to2(file.data);
+
+                //decompress the binary (also to binary)
+                file.data = URICompressor.decompress(file.data);
+
+                document.getElementById("display").innerHTML = "";
+
+                window.downloader.clear();
+                var name = file.name;
+                var type = file.type;
+                var data = URICompressor.BinaryToU8(file.data);
+                window.downloader.provide(name, type, data);
+            }
+            setInterval(function(){
+                document.getElementById("progress").innerHTML = "Progress: " + String(window.converter.progress).substring(2,4) + "%";
+            },1000);
         </script>
 
         <script>
@@ -57,26 +81,9 @@
             {
                 window.location.href = "./index.html";
             }
-            function copy()
+            function proceed()
             {
-                console.log("copying...");
-                var data = document.getElementById("result").innerHTML;
-                // Check if the Clipboard API is supported
-                if (navigator.clipboard)
-                {
-                    // Write the text to the clipboard
-                    navigator.clipboard.writeText(data)
-                    .then(() => {
-                    alert("Text successfully copied to clipboard");
-                    })
-                    .catch(err => {
-                    alert("Unable to copy text to clipboard", err);
-                    });
-                } 
-                else 
-                {
-                alert("Clipboard API not supported in this browser");
-                }
+                alert("program execution would now countine");
             }
         </script>
 
