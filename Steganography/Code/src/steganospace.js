@@ -78,7 +78,6 @@ export class Steganospace
 
         function binaryToString(binary)
         {
-            console.log(binary);
             var str = "";
             for(var i = 0; i < binary.length; i+=8)
             {

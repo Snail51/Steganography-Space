@@ -35,7 +35,8 @@ export class Base8Sub
     encode(message, cover)
     {
         console.log(message.length);
-        var count = countSpaces(cover);
+        cover = normalizeSpaces(cover, this.spaces); // make sure all spaces we are parsing get set to type 0
+        var count = countSpaces(cover, this.spaces);
         if(count <= message.length + 1) //tax of 2 (length is +1 plus and additional 1) needed for minimum XY(YYYY) pad
         {
             var warn = "Cover is not large enough. Trying to fit " + (message.length + 2) + " characters into " + count + " space (needs " + ((message.length+2) - count) + " more).";
@@ -78,9 +79,17 @@ export class Base8Sub
         }.bind(this));
         return newStr;
 
-        function countSpaces(cover)
+        function countSpaces(str, spaces)
         {
-            return (cover.split(" ").length - 1);
+            const re = new RegExp(("(?<![" + spaces[0] + "])[" + spaces[0] + "](?![" + spaces[0] + "])"),"g");
+            return ((str || '').match(re) || []).length;
+        }
+           
+        function normalizeSpaces(str, spaces)
+        {
+            var regex = "[" + spaces + "]";
+            var newStr = str.replace(new RegExp(regex, "g"), spaces[0]);
+            return newStr;
         }
     }
 
