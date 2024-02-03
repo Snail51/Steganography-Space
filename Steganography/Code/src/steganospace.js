@@ -16,9 +16,22 @@ export class Steganospace
         this.converter = new x2x8();
         this.substitutor = new Base8Sub();
 
-        //setInterval(function(){
-        //    document.getElementById("progress").innerHTML = "Progress: " + String(this.converter.progress).substring(2,4) + "%";
-        //}.bind(this),1000);
+        setInterval(function(){ //only allow the user to encode when files are given
+            var encoderMessage = this.messageReader.element.files;
+            encoderMessage = (encoderMessage.length > 0);
+            var encoderCover = this.coverReader.element.files;
+            encoderCover = (encoderCover.length > 0);
+            var enable = (encoderMessage && encoderCover);
+
+            document.getElementById("encode_button").disabled = !enable;
+        }.bind(this),100);
+
+        setInterval(function(){ //only allow the user to decode when files are given
+            var decoderFile = this.decodeReader.element.files;
+            decoderFile = (decoderFile.length > 0);
+
+            document.getElementById("decode_button").disabled = !decoderFile;
+        }.bind(this),100);
     }
 
     async encode()
