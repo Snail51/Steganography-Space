@@ -20,27 +20,20 @@ export class Steganospace
         //    document.getElementById("progress").innerHTML = "Progress: " + String(this.converter.progress).substring(2,4) + "%";
         //}.bind(this),1000);
     }
+
     async encode()
     {
         //read the message file as binary from the reader
         var message = await this.messageReader.readSingleAsBinary();
         var size1 = Math.floor(message.data.length/8);
 
-        var debug1 = message.data;;
-        document.getElementById("1").innerHTML = this.binaryToString(debug1);
-
         //compress the binary (also to binary)
         message.data = URICompressor.compress(message.data);
         var size2 = Math.floor(message.data.length/8);
         console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
         
-        var debug2 = URICompressor.decompress(message.data);
-        document.getElementById("2").innerHTML = this.binaryToString(debug2);
-
         //convert from binary (base 2) to octal (base8)
         message.data = this.converter.to8(message.data);
-
-        document.getElementById("3").innerHTML = message.data;
 
         //read the cover file as text from the reader
         var cover = await this.coverReader.readSingleAsText();
@@ -48,11 +41,10 @@ export class Steganospace
         //do the steganography
         var result = this.substitutor.encode(message.data, cover.data);
 
-        
-
         //send the file to the webpage for downloading
         this.encodeDownload.provide(cover.name, cover.type, result);
     }
+
     async decode()
     {
         //read the ciphertext file as text
@@ -61,16 +53,11 @@ export class Steganospace
         //undo the steganography
         decode.data = this.substitutor.decode(decode.data);
 
-        document.getElementById("4").innerHTML = decode.data;
-
         //convert from octal (base8) to binary (base 2)
         decode.data = this.converter.to2(decode.data);
 
         //decompress the binary data
         decode.data = URICompressor.decompress(decode.data);
-        console.log(decode.data);
-
-        document.getElementById("5").innerHTML = decode.data;
 
         //pull out the metadata needeed to reconstitute itself
         var namelen = decode.data.substring(decode.data.length - 32, decode.data.length - 16) //grab the bytes [-4:-2]
@@ -85,9 +72,6 @@ export class Steganospace
         type = decodeURIComponent(type);
         decode.data = decode.data.substring(0, decode.data.length - 32 - (namelen*8) - (typelen*8));
         decode.data = this.binaryToU8(decode.data);
-        console.log(name, type, decode.data);
-
-        document.getElementById("6").innerHTML = JSON.stringify(decode.data);
 
         //send it the the window for download
         this.decodeDownload.provide(name, type, decode.data);

@@ -18,7 +18,6 @@ export class Reader
         this.done = false;
         var file = this.collectMetadata(this.element.files[0]);
         file.data = await this.binaryRead(this.element.files[0]);
-        console.log(file);
 
         //assemble name append
         var name = stringToBinary(file.name);
@@ -43,7 +42,6 @@ export class Reader
         }
 
         //append the metadata
-        console.log(name, type, namelen, typelen);
         file.data = file.data + name + type + namelen + typelen;
 
         this.done = true;

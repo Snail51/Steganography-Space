@@ -34,7 +34,6 @@ export class Base8Sub
      */
     encode(message, cover)
     {
-        console.log(message.length);
         cover = normalizeSpaces(cover, this.spaces); // make sure all spaces we are parsing get set to type 0
         var count = countSpaces(cover, this.spaces);
         if(count <= message.length + 1) //tax of 2 (length is +1 plus and additional 1) needed for minimum XY(YYYY) pad
