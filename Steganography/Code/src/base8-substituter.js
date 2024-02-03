@@ -81,14 +81,14 @@ export class Base8Sub
 
         function countSpaces(str, spaces)
         {
-            const re = new RegExp(("(?<![" + spaces[0] + "])[" + spaces[0] + "](?![" + spaces[0] + "])"),"g");
+            const re = new RegExp(("(?<![ ])[ ](?![ ])"),"g");
             return ((str || '').match(re) || []).length;
         }
            
         function normalizeSpaces(str, spaces)
         {
             var regex = "[" + spaces + "]";
-            var newStr = str.replace(new RegExp(regex, "g"), spaces[0]);
+            var newStr = str.replace(new RegExp(regex, "g"), " ");
             return newStr;
         }
     }

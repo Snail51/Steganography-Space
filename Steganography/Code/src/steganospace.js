@@ -26,11 +26,17 @@ export class Steganospace
         var message = await this.messageReader.readSingleAsBinary();
         var size1 = Math.floor(message.data.length/8);
 
+        //var debug1 = message.data;
+        //console.log("preCompress", this.binaryToString(debug1));
+
         //compress the binary (also to binary)
         message.data = URICompressor.compress(message.data);
         var size2 = Math.floor(message.data.length/8);
         console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
         
+        //var debug2 = URICompressor.decompress(message.data);
+        //console.log("postCompress", this.binaryToString(debug2));
+
         //convert from binary (base 2) to octal (base8)
         message.data = this.converter.to8(message.data);
 
@@ -64,28 +70,28 @@ export class Steganospace
         var typelen = decode.data.substring(decode.data.length - 16, decode.data.length - 0) //grab the bytes [-1:-0]
         typelen = Number.parseInt(typelen, 2);
         var name = decode.data.substring(decode.data.length - 32 - (typelen*8)  - (namelen*8), decode.data.length - 32 - (typelen*8));
-        name = binaryToString(name);
+        name = this.binaryToString(name);
         name = decodeURIComponent(name);
         var type = decode.data.substring(decode.data.length - 32 - (typelen*8), decode.data.length - 32);
-        type = binaryToString(type);
+        type = this.binaryToString(type);
         type = decodeURIComponent(type);
         decode.data = decode.data.substring(0, decode.data.length - 32 - (namelen*8) - (typelen*8));
-        decode.data = binaryToString(decode.data);
+        decode.data = this.binaryToString(decode.data);
         console.log(name, type, decode.data);
 
         //send it the the window for download
         this.decodeDownload.provide(name, type, decode.data);
+    }
 
-        function binaryToString(binary)
+    binaryToString(binary)
+    {
+        var str = "";
+        for(var i = 0; i < binary.length; i+=8)
         {
-            var str = "";
-            for(var i = 0; i < binary.length; i+=8)
-            {
-                var ten = Number.parseInt(binary.substring(i, i+8),2);
-                str += String.fromCodePoint(ten);
-            }
-            return str;
+            var ten = Number.parseInt(binary.substring(i, i+8),2);
+            str += String.fromCodePoint(ten);
         }
+        return str;
     }
 }
 
