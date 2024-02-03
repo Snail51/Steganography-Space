@@ -5,7 +5,7 @@ export class Base8Sub
     {
         //decide what spaces will be used
         this.spaces = "";
-        this.spaceType = "BILLIARDS"; //SPACE, BILLIARDS
+        this.spaceType = "SPACE"; //SPACE, BILLIARDS
 
 
         switch(this.spaceType)
