@@ -1,0 +1,1 @@
+export class Provider{constructor(e){this.element=document.getElementById(e),this.serve}clear(){URL.revokeObjectURL(this.serve),this.element.href=null,this.element.download=null,this.element.innerHTML=""}provide(e,t,n){var r=new Blob([n],{type:t});this.serve=URL.createObjectURL(r),this.element.href=this.serve,this.element.download=e,this.element.innerHTML=e}}
