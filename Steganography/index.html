@@ -7,9 +7,13 @@
     </head>
     <body style="background-color: rgb(44, 46, 54); color: whitesmoke; font-size: 24px;">
         <h1>Steganospace</h1>
-        <div style="display: flex; height: 80vh;">
-            <div style="flex: 1; height: 80vh; border: 2px solid whitesmoke; padding-left: 24px; padding-right: 24px;">
+        <i style="color: whitesmoke;">This tool was developed by Brendan Rood, Jet Li, and Connor Hagen in the spring of 2024</i>
+        <hr>
+        <div style="display: flex; height: 90vh;">
+            <div style="flex: 1; height: 90vh; border: 2px solid whitesmoke; padding-left: 24px; padding-right: 24px;">
                 <h1>Encoder</h1>
+                <p>Provide a raw text file as the cover, and any file as the message. Keep in mind that longer messages require a longer cover to hold. After encoding, you will be provided with a file with the same name as the cover but with the spaces replaced in such a way as to encode the message you provided. &lpar;100MB Max&rpar;</p>
+                <a href="https://www.o-bible.com/download/kjv.txt" style="color:cyan">The Bible makes for an excellent Cover</a>
                 <hr>
                 <div style="display: flex;">
                     <div style="flex: 1;">
@@ -26,10 +30,11 @@
                 <hr>
                 <a id="encode_download" style="color: cyan;">Result Will Go Here</a>
             </div>
-            <div style="flex: 1; height: 80vh;  border: 2px solid whitesmoke; padding-left: 24px; padding-right: 24px;">
+            <div style="flex: 1; height: 90vh;  border: 2px solid whitesmoke; padding-left: 24px; padding-right: 24px;">
                 <div style="display: flex;">
                     <div style="flex: 1;">
                         <h1>Decoder</h1>
+                        <p>Do the spaces in a text document look slightly off to you? A message may have been encoded in them! Provide the text document in question below and this tool will extract the hidden message if one exists in this format. &lpar;100MB Max&rpar;</p>
                         <hr>
                         <p>Ciphertext</p>
                         <input type="file" id="ciphertext" single accept=".txt">
@@ -94,12 +99,9 @@ Steganospace
 │   ​├── ​Message may be of any type.
 │   ​└── ​If the Cover is not large enough to encode the Message, a warning is given that says how much more space is needed.
 ├── ​Examples
-│   ​└── ​<a href="https://lars.d.umn.edu/brendan/Steganospace/Examples" style="color: cyan">https://lars.d.umn.edu/brendan/Steganospace/Examples</a>
+│   ​└── ​<a href="https://lars.d.umn.edu/brendan/TurtleGang/Steganospace/Examples" style="color: cyan">https://lars.d.umn.edu/brendan/TurtleGang/Steganospace/Examples</a>
 └── ​GitHub Link
     ​└── ​<a href="https://github.umn.edu/hage0584/steganographyLab/tree/main/Steganography" style="color:cyan">https://github.umn.edu/hage0584/steganographyLab/tree/main/Steganography</a>
 </pre>
-
-        <hr>
-        <i style="color: whitesmoke;">This tool was developed by Brendan Rood, Jet Li, and Connor Hagen in the spring of 2024</i>
     </body>
 </html>

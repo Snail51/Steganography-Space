@@ -17,10 +17,13 @@ export class Provider
      */
     clear()
     {
-        URL.revokeObjectURL(this.serve);
+        if(this.serve != null)
+        {
+            URL.revokeObjectURL(this.serve);
+        }
         this.element.href = null;
         this.element.download = null;
-        this.element.innerHTML = "";
+        this.element.innerHTML = "Processing... Please Wait...";
     }
 
     /**
@@ -37,5 +40,14 @@ export class Provider
         this.element.href = this.serve;
         this.element.download = name;
         this.element.innerHTML = name;
+    }
+
+    /**
+     * Return the object to an inert state, displaying an error message.
+     */
+    error()
+    {
+        this.clear();
+        this.element.innerHTML = "Error. Process Aborted.";
     }
 }

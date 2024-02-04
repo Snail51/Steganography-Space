@@ -12,7 +12,7 @@ export class URICompressor
         if(!URICompressor.isBinaryString(uncompressedBinary))
         {
             console.warn("could not compress string, not binary");
-            return;
+            return null;
         }
 
         uncompressedBinary = URICompressor.BinaryToU8(uncompressedBinary);

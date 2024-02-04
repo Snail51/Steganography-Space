@@ -8,6 +8,8 @@ export class Steganospace
 {
     constructor()
     {
+        this.maxSize = 100 * 1024 * 1024; //100MB
+
         this.messageReader = new Reader("message");
         this.coverReader = new Reader("cover");
         this.decodeReader = new Reader("ciphertext");
@@ -17,31 +19,35 @@ export class Steganospace
         this.substitutor = new Base8Sub();
 
         setInterval(function(){ //only allow the user to encode when files are given
-            var encoderMessage = this.messageReader.element.files;
-            encoderMessage = (encoderMessage.length > 0);
-            var encoderCover = this.coverReader.element.files;
-            encoderCover = (encoderCover.length > 0);
-            var enable = (encoderMessage && encoderCover);
-
-            document.getElementById("encode_button").disabled = !enable;
+            document.getElementById("encode_button").disabled = !this.encodeValidate();
         }.bind(this),100);
 
         setInterval(function(){ //only allow the user to decode when files are given
             var decoderFile = this.decodeReader.element.files;
             decoderFile = (decoderFile.length > 0);
 
-            document.getElementById("decode_button").disabled = !decoderFile;
+            document.getElementById("decode_button").disabled = !this.decodeValidate();
         }.bind(this),100);
     }
 
     async encode()
     {
+        //clear the sceen
+        this.encodeDownload.clear();
+        await this.sleep(1000);
+
         //read the message file as binary from the reader
         var message = await this.messageReader.readSingleAsBinary();
         var size1 = Math.floor(message.data.length/8);
 
         //compress the binary (also to binary)
         message.data = URICompressor.compress(message.data);
+        if(message.data == null)
+        {
+            this.encodeDownload.error();
+            await this.sleep(1000);
+            return; //abort if compression failed
+        }
         var size2 = Math.floor(message.data.length/8);
         console.log("Compression reduced file from " + size1 + " bytes to " + size2 + " bytes (" + size2/size1 + ")");
         
@@ -53,6 +59,12 @@ export class Steganospace
 
         //do the steganography
         var result = this.substitutor.encode(message.data, cover.data);
+        if(result == null)
+        {
+            this.encodeDownload.error();
+            await this.sleep(1000);
+            return; //abort if cover is not large enough
+        }
 
         //send the file to the webpage for downloading
         this.encodeDownload.provide(cover.name, cover.type, result);
@@ -60,6 +72,10 @@ export class Steganospace
 
     async decode()
     {
+        //clear the screen
+        this.decodeDownload.clear();
+        await this.sleep(1000);
+
         //read the ciphertext file as text
         var decode = await this.decodeReader.readSingleAsText();
 
@@ -68,9 +84,21 @@ export class Steganospace
 
         //convert from octal (base8) to binary (base 2)
         decode.data = this.converter.to2(decode.data);
+        if(decode.data == null)
+        {
+            this.decodeDownload.error();
+            await this.sleep(1000);
+            return; //abort if compression failed
+        }
 
         //decompress the binary data
         decode.data = URICompressor.decompress(decode.data);
+        if(decode.data == null)
+        {
+            this.decodeDownload.error();
+            await this.sleep(1000);
+            return; //abort if compression failed
+        }
 
         //pull out the metadata needeed to reconstitute itself
         var namelen = decode.data.substring(decode.data.length - 32, decode.data.length - 16) //grab the bytes [-4:-2]
@@ -112,6 +140,57 @@ export class Steganospace
         var result = new Uint8Array(holder);
         //console.log("ResultantU8", result)
         return result;
+    }
+
+    sleep(ms = 0) 
+    {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    encodeValidate()
+    {
+        try
+        {
+            //make sure uploads exist
+            var messageExists = (this.messageReader.element.files.length == 1);
+            var coverExists = (this.coverReader.element.files.length == 1);
+
+            //make sure uploads aren't too large
+            var messageSmall = (this.messageReader.element.files[0].size < this.maxSize);
+            var coverSmall = (this.coverReader.element.files[0].size < this.maxSize);
+
+            //make sure the cover is of type `text/plain`
+            var coverText = (this.coverReader.element.files[0].type == "text/plain");
+
+            // AND
+            return (messageExists && messageSmall && coverExists && coverSmall && coverText);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    decodeValidate()
+    {
+        try
+        {
+            //make sure uploads exist
+            var cipherExists = (this.decodeReader.element.files.length == 1);
+
+            //make sure uploads aren't too large
+            var cipherSmall = (this.decodeReader.element.files[0].size < this.maxSize);
+
+            //make sure the cipher is of type `text/plain`
+            var cipherText = (this.decodeReader.element.files[0].type == "text/plain");
+
+            // AND
+            return(cipherExists && cipherSmall && cipherText);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
 
