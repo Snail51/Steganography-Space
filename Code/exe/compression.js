@@ -1,1 +1,5 @@
+// MINIFIED VERSION OF THE FILE OF THE SAME NAME IN THE `src` FOLDER
+// MINIFIED WITH https://www.toptal.com/developers/javascript-minifier
+// MINIFIED AT Sat Apr 19 17:08:14 CDT 2025
+
 import"./pako.js";export class URICompressor{constructor(){}static compress(r){if(!URICompressor.isBinaryString(r))return console.warn("could not compress string, not binary"),null;r=URICompressor.BinaryToU8(r);var t=pako.deflate(r,{level:9});return URICompressor.U8toBinary(t)}static decompress(r){if(!URICompressor.isBinaryString(r)){console.warn("could not decompress string, not binary");return}var t=URICompressor.BinaryToU8(r),s=pako.inflate(t,{level:9});return URICompressor.U8toBinary(s)}static U8toBinary(r){var t="";for(var s of r){var n=s.toString(2);t+=n=n.padStart(8,"0")}return t}static BinaryToU8(r){var t=URICompressor.splitIntoChunks(r,8),s=[];for(var n of t)s.push(Number.parseInt(n,2));return new Uint8Array(s)}static splitIntoChunks(r,t){for(var s=[],n=0;n<r.length;n+=t)s.push(r.slice(n,n+t));return s}static isBinaryString(r){var t,s,n,o=0==r.length%8,e=(t=r,s=t.match(/[^01]/g),null==s&&(s=""),n=0==t.length%8,0==s.length&&n);return"string"==typeof r&&o&&e}}
